@@ -1,0 +1,126 @@
+\chapter{Conclusions}
+\label{ch:conclusion}
+\noindent
+This project managed to fuse the measurements of multiple and heterogeneous sensors.
+It has been demonstrated how the implementation of this sensor fusion technique exploited the 
+
+\section{Discussions}
+\todo[inline]{Describe the conclusions (reflect on the whole introduction given in Chapter 1).}
+\label{sec:discussion}
+  
+\noindent
+Discuss the positive effects and the drawbacks.\\
+Describe the evaluation of the results of the degree project.\\
+Did you meet your goals?\\
+What insights have you gained?\\
+What suggestions can you give to others working in this area?\\
+If you had it to do again, what would you have done differently?\\
+
+
+\section{Limitations}
+\todo[inline]{What did you find that limited your
+  efforts? What are the limitations of your results?}
+\label{sec:limitations}
+
+\section{Future works}
+\todo[inline]{Describe valid future work that you or someone else could or should do.\\
+Consider: What you have left undone? What are the next obvious things to be done? What hints can you give to the next person who is going to follow up on your work?
+}
+\label{sec:futureWork}
+\com{
+Due to the breadth of the problem, only some of the initial goals have been
+met. In these section we will focus on some of the remaining issues that
+should be addressed in future work. ...
+}
+
+\com{
+In particular, the author of this thesis wishes to point out xxxxxx remains as
+a problem to be solved. Solving this problem is the next thing that should be
+done. ...
+}
+
+\noindent
+Expanding the states of the system in order to navigate in a 3D environment instead than a simple 2D environment as in this project.
+It will be possible to account for slopes in the lawn and it could be interesting to evaluate its influence in the GPS readings.
+
+
+It could be investigated a trade off between computations needed for a reliable SLAM implementation instead of an online implementation provided in this report. 
+
+
+Exploit depth information from the camera to provide a faster identification of collision events, eventually providing a map of the environment based on depth information instead of collision events.
+Instead of using the collision sensors to update the map, the camera, and its depth readings,  could be used for object detection to identify and avoid the objects before collision.
+
+
+Outliers detection in case of non reliable sensors and once the covariances noises matrices have been ultimately perfected. Moreover, it can be crucial when the sensors are not behaving correctly.
+
+
+Intrinsic and Extrinsic Calibration\\
+Currently, we are considering the case of a mobile
+robot whose odometry is not calibrated. In this case,
+the observability analysis will extend to the parameters
+characterizing the odometry error (e.g. wheel diameters,
+distance between the wheel).
+
+
+Path planning algorithm as in~\cite{coveragePathplanning} and \cite{machines6040046}, can be used to provide coverage features to the autonomous lawn mowers.
+A comprehensive overview about coverage is available in \cite{galceran_survey_2013}. It discusses all the available techniques and their related strengths and weaknesses.
+More specific approaches to be investigated can be found in \cite{hameed_coverage_2017} and \cite{cabreira_grid-based_2019}.
+Regarding the avoidance of the objects for the unexpected detection of objects, a techniques is define in \cite{daltorio_obstacle-edging_2010}.
+
+
+
+\section{Reflections}
+\todo[inline]{What are the relevant economic, social,
+  environmental, and ethical aspects of your work?
+}
+\label{sec:reflections}
+
+\noindent This project will address the following ethics and sustainability issues:
+\begin{itemize}
+    \item Waste reduction: keeping the localisation module included in the automower will remove the need to install additional infrastructure which could then be susceptible to deterioration.
+    \item Bees preservation: Thanks to a more accurate control of the lawn with a given map, it will be possible to dynamically update it and preserve a part of the lawn to allow bees to prosper, without intervening on the boundary wire.
+    \item Privacy issue: the images needed for the visual odometry module are going to be used inside the automower, not shared outside of it. They will be destroyed after their processing, avoiding breach of personal privacy in case of theft of the memory card.
+\end{itemize}
+
+\subsection{Environmental}
+\noindent
+With a more precise localisation and navigation system the intervention on the lawn will be reduced.
+Moreover, with the possibility to set virtual boundaries for the automower, it will be possible to save part of the lawn for bees to find flowers to sustain themselves and prosper.
+
+
+\subsection{Security}
+\noindent
+
+The system is self-contained, and every information is stored inside the embedded Raspberry Pi 4. 
+The single output that might be relevant to share can be the current position of the automower and the updated map that he has available for navigation.
+
+The online system that doesn't store the history of the states also helps with the security of the information stored.
+
+It can be easily protected through a password to avoid theft of information. 
+The SD card could be encrypted also to avoid theft of it and retrieval of information through that memory.
+
+\subsection{Cost analysis}
+\com{
+The current prototype works, but the performance from a cost perspective makes
+this an impractical solution. Future work must reduce the cost of this
+solution, to do so a cost analysis needs to first be done. ...
+}
+\noindent
+
+As an economic results, by simply adding additional GPS, IMU, and RGB-D camera it is possible to remove the need of the boundary wire.
+As such, by adding to the automower the cost of these additional sensors it will be possible to save money in the additional maintenance required.
+Overall, given the high reliability over time of these sensor, the consumers will be able to save money in the long run. 
+However, the product-market fit might not be the best, since the company that will sell the automower also provides the boundary wire and removing that need will economically lower their revenues in that aspects. Anyway, the customers will be more willing to buy a system that requires less maintenance.
+So the trade-off will be between the more services offered and the lower revenues from selling additional infrastructures.
+\todo[inline]{Analysis of costs of sensors and usual boundary wire, plus related maintenance}
+
+It saves also the energy that now is given to the boundary wire to power the magnetic field that the automower need to detect its boundaries now.
+
+\com{
+The thesis contributes to the \gls{UN}\enspace\glspl{SDG} numbers 1 and 9 by
+xxxx.
+}
+
+
+\cleardoublepage
+%\clearpage

@@ -1,0 +1,64 @@
+% --- Figure Definition --- %
+\begin{figure}[!ht]
+  \begin{center}
+    \includegraphics[width=0.5\textwidth]{Images/lots_of_stars.png}
+  \end{center}
+  \caption{Lots of stars  (Inspired by Figure x.y on page z of [xxx])}
+  \label{fig:lotsofstars}
+\end{figure}
+
+% --- Table Definition --- %
+\begin{table}[!ht]
+  \begin{center}
+    \caption{xxx characteristics}
+    \label{tab:tablecaracteristics}
+    \begin{tabular}{l|S[table-format=4.6]} % <-- Alignments: 1st column left, 2nd middle, with vertical lines in between
+      \textbf{Characteristics} & \textbf{Description}\\
+      $\alpha$ & $\beta$ \\
+      \hline
+      1 & 1110.1\\
+      2 & 10.1\\
+      3 & 23.113231\\
+    \end{tabular}
+  \end{center}
+\end{table}
+
+
+% --- Latex bytefield Figure Definition 0 --- %
+\begin{figure}[!ht]
+	\centering
+\begin{bytefield}{21}
+\bitbox[]{7}{} & \bitbox[]{3}{\tiny octets:} & \bitbox[]{4}{\tiny 6} & \bitbox[]{4}{\tiny 6} & \bitbox[]{3}{\tiny 2} & \bitbox[]{5}{\tiny 46 to 1500} & \bitbox[]{3}{\tiny 0 to 46} & \bitbox[]{2}{\tiny 4}\\ 
+
+\bitbox[]{8}{\textbf{ETHERNET \\[-1ex] \tiny{data link-layer}}} & \bitbox[]{2}{} & 
+
+\bitbox{4}{\tiny Destination Address} & \bitbox{4}{\tiny Source Address} & \bitbox{3}{\tiny Length/ Type} & 
+\bitbox{5}{\tiny Data Payload} & \bitbox{3}{\tiny Padding} &
+\bitbox{2}{\tiny CRC} \\
+
+\bitbox[]{1}{} &\bitbox[]{3}{\tiny octets:} & \bitbox[]{4}{\tiny 7} & \bitbox[]{2}{\tiny 1} & \bitbox[]{0}{$\vdots$ \\[1ex]} & \bitbox[]{16}{} & \bitbox[]{0}{$\vdots$ \\[1ex]} & \bitbox[]{5}{} & \bitbox[]{4}{\tiny Variable}\\
+
+\bitbox[]{4}{\textbf{MAC \\[-1ex] \tiny{packet}}} & \colorbitbox{lightgrey}{4}{\tiny Preamble} & \colorbitbox{lightgrey}{2}{\tiny SFD} & \colorbitbox{lightgrey}{16}{\tiny MAC Client Data} & \colorbitbox{lightgrey}{3}{\tiny Padding} &
+\colorbitbox{lightgrey}{2}{\tiny CRC} & \colorbitbox{lightgrey}{4}{\tiny Extension}
+\end{bytefield}
+     \label{fig:ieee8023-data-packet}
+     \caption{Ethernet data link layer protocol encapsulated into a IEEE~802.3 MAC packet}
+\end{figure}
+
+
+% --- Latex bytefield Figure Definition 1 --- %
+\begin{figure}[!ht]
+	\centering
+\begin{bytefield}{32}
+\bitheader{0-31} \\
+\bitbox{4}{\footnotesize{Version}} & \bitbox{4}{IHL} & \bitbox{6}{\tiny{Type of Service}} & \bitbox{2}{{\scriptsize ECN}} \bitbox{16}{Total Length}\\
+\bitbox{16}{Identification} & \bitbox{3}{Flags} & \bitbox{13}{Fragment Offset}\\
+\bitbox{8}{Time to Live} & \bitbox{8}{Protocol} & \bitbox{16}{Header Checksum}\\
+\wordbox{1}{Source Address}\\
+\wordbox{1}{Destination Address}\\
+\colorbitbox{lightgrey}{24}{Options} & \colorbitbox{lightgrey}{8}{Padding}
+\end{bytefield}
+     \label{fig:ipv4-header} 
+     \caption[IPv4 datagram header]{IPv4 datagram header. Light grey coloured fields are optional.}
+\end{figure}
+

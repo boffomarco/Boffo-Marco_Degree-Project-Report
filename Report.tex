@@ -1,0 +1,70 @@
+\documentclass[english]{kththesis}
+
+\input{Input/packages.tex}
+
+\newenvironment{swedishnotes}%
+  {\begin{center}
+      \selectlanguage{swedish}
+      \color{blue}}%
+    {\end{center}\selectlanguage{english}
+    }
+  
+\begin{document}
+
+\selectlanguage{english}
+
+\input{Input/Chapters/0-Title}
+
+%\listoftodos
+
+% Frontmatter includes the abstracts and table-of-contents
+%\frontmatter
+\setcounter{page}{1}
+
+\input{Input/Chapters/0.1-AbstractEng}
+\input{Input/Chapters/0.2-AbstractSe}
+\input{Input/Chapters/0.3-AbstractIt}
+
+% set to the language of the body of the thesis
+\selectlanguage{english}
+
+\input{Input/Chapters/0.4-Acknowledgments}
+
+
+\fancypagestyle{plain}{}
+\renewcommand{\chaptermark}[1]{ \markboth{#1}{}} 
+
+\input{Input/Chapters/0.5-Info}
+
+
+% Mainmatter is where the actual contents of the thesis goes
+\mainmatter
+
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+
+\begin{sloppypar}                           
+    \input{Input/Chapters/1-Introduction}
+    
+    \input{Input/Chapters/2-Background}
+    
+    %\input{Input/Chapters/3-Method}
+    
+    \input{Input/Chapters/4-Done}
+    
+    \input{Input/Chapters/5-Result}
+    
+    %\input{Input/Chapters/6-Discussion}
+    
+    \input{Input/Chapters/7-Conclusion}
+
+    \input{Input/Chapters/8-References}
+    
+    \input{Input/Chapters/9-Appendix}
+
+\end{sloppypar}
+
+\label{pg:lastPageofMainmatter}
+
+\input{Input/DIVA}
+
+\end{document}

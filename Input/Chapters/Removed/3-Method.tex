@@ -1,0 +1,500 @@
+\chapter{Methods}
+\label{ch:whatYouDid}
+
+\com{
+\todo[inline]{Choose your own chapter title to describe this}
+
+\todo[inline]{What have you done? How did you do it? What design decisions did you make? How did what you did help you to meet your goals?}
+}
+
+
+
+Describe the engineering-related contents (preferably with models) and the research methodology and methods that are used in the degree project. 
+
+Give a theoretical description of the scientific or engineering methodology are you going to use and why have you chosen this method. What other methods did you consider and why did you reject them.
+
+In this chapter, you describe what engineering-related and scientific skills you are going to apply, such as modeling, analyzing, developing, and evaluating engineering-related and scientific content. The choice of these methods should be appropriate for the problem . Additionally, you should be consciousness of aspects relating to society and ethics (if applicable). The choices should also reflect your goals and what you (or someone else) should be able to do as a result of your solution - which could not be done well before you started.
+
+The purpose of this chapter is to provide an overview of the research method
+used in this thesis. Section~\ref{sec:researchProcess} describes the research
+process. Section~\ref{sec:researchParadigm} details the research
+paradigm. Section~\ref{sec:dataCollection} focuses on the data collection
+techniques used for this research. Section~\ref{sec:experimentalDesign}
+describes the experimental design. Section~\ref{sec:assessingReliability}
+explains the techniques used to evaluate the reliability and validity of the
+data collected. Section~\ref{sec:plannedDataAnalysis} describes the method
+used for the data analysis. Finally, Section~\ref{sec:evaluationFramework}
+describes the framework selected to evaluate xxx.
+
+
+\section{Research Process}
+\label{sec:researchProcess}
+ 
+\com{
+\begin{figure}[!ht]
+  \begin{center}
+    \includegraphics[width=0.5\textwidth]{Images/4-Done/}
+  \end{center}
+  \caption{Research Process}
+  \label{fig:researchprocess}
+\end{figure}
+}
+
+\section{Research Paradigm}
+\label{sec:researchParadigm}
+
+\section{Data Collection}
+\todo[inline]{This should also show that you are aware of the social and ethical concerns that might be relevant to your data collection method.)}
+\label{sec:dataCollection}
+To gather data used to test and analyse the performance of the system, multiple outdoor tests have been carried on.
+Some tests have been made to define the calibration of the sensors against a ground truth identified using measure tape. 
+Some other tests have been made to ensure that the system is behaving accurately while steering.
+Some tests have been made to check that the collision events are estimated with an certain degree of precision.
+
+During these tests the rosbag utils provided by ROS has been exploited. Through this service it is possible to store every message sent to the topics, and they can be reused in the future to tune the algorithms.
+In this way, the real measurements gathered during outdoor testing can be re evaluated through the play of said messages and using a simulated parameter to reset the clock of ROS framework.
+
+
+
+\subsection{Sampling}
+
+
+\section{Experimental design / Planned Measurements}
+\label{sec:experimentalDesign}
+
+\subsection{Test environment / test bed / model}\todo[inline]{Describe everything that someone else would need to reproduce your test environment/test bed/model/… .}
+
+\subsection{Hardware / Software to be used}
+Raspberry Pi 4 to guide the automower, to gather information about the topics of ROS, and to communicate them to the personal computer used to gather them.
+Husqvarna Automower that holds the sensors and the raspberry pi, also proving the measurements of the wheel encoders and of the embedded GPS receiver. 
+Computer to guide the automower and make him move according to the desired path, also at the end the automower was free to run its random path and use the algorithm implemented to stay inside the boundaries.
+
+
+\section{Assessing reliability and validity of the data collected}
+\label{sec:assessingReliability}
+Test on real measurements gathered in different conditions of terrain, slope, and conditions.
+Multiple tests have been repeated to measure the measurement's value noise of each sensors.
+
+
+\subsection{Validity of method}
+\todo[inline]{How will you know if your results are valid?}
+
+\subsection{Reliability of method}
+\todo[inline]{How will you know if your results are reliable?}
+
+\subsection{Data validity}
+
+\subsection{Reliability of data}
+
+
+\section{Planned Data Analysis}
+\label{sec:plannedDataAnalysis}
+
+\subsection{Data Analysis Technique}
+
+\subsection{Software Tools}
+C++ and Python development to work with the ROS framework.
+Network establishment to communicate wirelessly between Raspberry Pi and computer.
+
+
+\section{Evaluation framework}
+\label{sec:evaluationFramework}
+
+\section{System documentation}
+\todo[inline]{If this is going to be a complete document consider putting it in as an appendix, then just put the highlights here.}
+
+
+
+
+\section{Hardware / Software design … / Model / Simulation model \& parameters / …}
+
+ 
+%\begin{figure}[!ht]
+%  \begin{center}
+%    \includegraphics[width=0.25\textwidth]{Homepage-icon.png}
+%  \end{center}
+%  \caption{Homepage icon}
+%  \label{fig:homepageicon}
+%\end{figure}
+
+
+\section{Implementation … / Modeling / Simulation / …}
+\label{sec:implementationDetails}
+
+\section{Batch Extended Kalman Filter}
+
+\subsection{Prediction Step}
+
+$$
+  \label{eq:state-transf}
+\mathbf{X}_t=
+\begin{bmatrix} 
+\mathbf{x}_t & \mathbf{y}_t & \boldsymbol \theta_t & \mathbf{v}_t & \dot{\boldsymbol \theta}_t & \mathbf{a}_t 
+\end{bmatrix} ^T
+$$
+
+\subsubsection{Transition}
+\begin{equation}
+A_t
+=
+\begin{bmatrix} 
+1 & 0 & 0 & dt \cdot \cos(\boldsymbol \theta_t) & 0 & \frac{dt^2 \cdot \cos(\boldsymbol \theta_t)}{2} \\ 
+0 & 1 & 0 & dt \cdot \sin(\boldsymbol \theta_t)& 0 & \frac{dt^2 \cdot \sin(\boldsymbol \theta_t)}{2} \\ 
+0 & 0 & 1 & 0 & dt & 0 \\ 
+0 & 0 & 0 & 1 & 0 & dt \\ 
+0 & 0 & 0 & 0 & 1 & 0 \\ 
+0 & 0 & 0 & 0 & 0 & 1 
+\end{bmatrix}
+\end{equation}
+
+
+\subsubsection{Control}
+\begin{align}
+B
+= 
+    \begin{bmatrix} 
+    0 \\
+    0 \\
+    0 \\
+    1 \\
+    1 \\
+    0 \\
+    0  
+    \end{bmatrix}
+& \quad
+\mathbf{u}_t
+= 
+    \begin{bmatrix} 
+    \boldsymbol \Delta_{\mathbf{v}}  \\
+    \boldsymbol \Delta_{ \dot{\boldsymbol \theta}} \\[0.3em]
+    \end{bmatrix}
+\end{align}
+where:
+  \begin{align}
+     \boldsymbol \Delta_{\mathbf{v}} = \text{Control}_{\mathbf{v}} - \mathbf{v}_t  \\
+    \boldsymbol \Delta_{ \dot{\boldsymbol \theta}} = \text{Control}_{\dot{\boldsymbol \theta}} - \dot{\boldsymbol \theta}_t
+  \end{align}
+  
+$ \text{Control}_{\mathbf{v}}$ and  $\text{Control}_{\mathbf{\dot{\boldsymbol \theta}}}$ are the command sent to the robot, obtained by a specific topic.
+
+The noise vector is defined as
+\begin{equation}
+\boldsymbol \omega
+=
+\begin{bmatrix} 
+\omega_{\mathbf{x}}  & 
+\omega_{\mathbf{y}} &
+\omega_{\boldsymbol \theta}  & 
+\omega_{\mathbf{v}} & 
+\omega_{\dot{\boldsymbol \theta}} &
+\omega_{\mathbf{a}}
+\end{bmatrix} ^T
+\end{equation}
+where $\omega_i \sim \mathcal{N}(\mu_i,\,\sigma_{ii}^{2})$ with $\mu_i = 0$, $\sigma_{ii}^2 = 0.1$, and $ i = \{ \mathbf{x} , \mathbf{y} , \boldsymbol \theta , \mathbf{v} , \mathbf{\dot{\boldsymbol \theta}} , \mathbf{a} \}$
+
+The prediction step for the state variables is then the following
+\begin{equation}
+\mathbf{X}_{p} = A \cdot \mathbf{X}_t + B \cdot \mathbf{u}_t + \boldsymbol \omega
+\end{equation}
+
+Since we are dealing with an Extended Kalman Filter, the Jacobian of the transition matrix must be obtained to linearise the non-linear equations with a first order taylor expansion, obtaining :
+
+\begin{equation}
+J_A
+=
+\begin{bmatrix} 
+1 & 0 & 0 & dt \cdot ( - \sin(\boldsymbol \theta_t)) & 0 & \frac{dt^2 \cdot ( - \sin(\boldsymbol \theta_t)}{2}) \\ 
+0 & 1 & 0 & dt \cdot \cos(\boldsymbol \theta_t)& 0 & \frac{dt^2 \cdot \cos(\boldsymbol \theta_t)}{2} \\ 
+0 & 0 & 1  & 0 & dt & 0 \\
+0 & 0 & 0 & 1 & 0 & dt \\ 
+0 & 0 & 0 & 0 & 1 & 0 \\ 
+0 & 0 & 0 & 0 & 0 & 1 \\[0.3em]
+\end{bmatrix}
+\end{equation}
+\todo{0 in xx and dot theta?}
+
+\begin{equation}
+Q
+=
+\begin{bmatrix} 
+\sigma_{\mathbf{xx}}^2 & 0 & 0 & 0 & 0 & 0 \\ 
+0 & \sigma_{\mathbf{yy}}^2 & 0 & 0 & 0 & 0 \\ 
+0 & 0 & \sigma_{\mathbf{\boldsymbol \theta \boldsymbol \theta}}^2 & 0 & 0 & 0 \\ 
+0 & 0 & 0 & \sigma_{\mathbf{vv}}^2 & 0 & 0 \\ 
+0 & 0 & 0 & 0 & \sigma_{\mathbf{\dot{\boldsymbol \theta}\dot{\boldsymbol \theta}}}^2 & 0 \\ 
+0 & 0 & 0 & 0 & 0 & \sigma_{\mathbf{aa}}^2 \\ 
+\end{bmatrix}
+\end{equation}
+
+Finally the covariance matrix after prediction is:
+
+\begin{align}
+    P_{p} & = J_A \cdot P_t \cdot J_A^T + Q && \\
+    P_{p} & =  \frac{P_{p} +  P_{p}^T}{2} && \text{To ensure symmetry} 
+\end{align}
+
+
+\subsection{Measurements Step}
+Check for new measurements in background and dynamically create the components for the update step
+
+\subsubsection{GPS}
+
+In order to get the mean using the first measurements before the first command to move the automower, those values are stored in $\mu_{lat}$ and $\mu_{long}$.
+
+The formula used to obtain the distance between this mean value and the current value of the gps measurements can be found at Appendix
+
+\begin{align}
+\mathbf{x}_{GPS_t} & = \text{geodetic2enu}( z_{lat} - \mu_{lat})\\
+\mathbf{y}_{GPS_t} & = \text{geodetic2enu}( z_{long} - \mu_{long})
+\end{align}
+
+\begin{equation}
+z_{\boldsymbol \theta_{GPS_t}} = \arctan(\mathbf{y}_{GPS_{t-1}} - \mathbf{y}_{GPS_t}, \mathbf{x}_{GPS_{t-1}} - \mathbf{x}_{GPS_t} )
+\end{equation}
+
+In this section we shall assume that wrapping operation
+amounts to enforcing the angular variable to be in the [$-\pi$, $\pi$]
+interval, and we designate this operation as follows
+\begin{equation}
+w_{\pi}(x) = mod(x + \pi, 2\pi) - \pi
+\end{equation}
+
+Note that when computing the difference between two angular
+variables, the wrapping effect of the circle should be taken into
+account, e.g., the difference between 178° and -178° should
+evaluate to 4°. This is achieved by the function $w_{\pi}(x)$ when the difference
+is given as the argument, i.e., difference between two angles
+x and y is computed as $w_{\pi}(x-y)$, as defined in "On wrapping the Kalman filter and estimating with
+the SO(2) group"
+
+$$
+\boldsymbol \theta_{GPS_t} = \boldsymbol \theta_{t} + w_{\pi}(z_{\boldsymbol \theta_{GPS_t}} - \boldsymbol \theta_{t})
+$$
+
+Measurements vector with uncertainty vector
+\begin{align}
+\mathbf{Z}
+=
+\begin{bmatrix} 
+\mathbf{x}_{GPS_t} \\ 
+\mathbf{y}_{GPS_t} \\ 
+\boldsymbol \theta_{GPS_t} \\ 
+\end{bmatrix}^T
+& \quad
+\mathbf{R}
+=
+\begin{bmatrix} 
+\omega_{\mathbf{x}_{GPS}} \\ 
+\omega_{\mathbf{y}_{GPS}} \\ 
+\omega_{\boldsymbol \theta_{GPS}} \\ 
+\end{bmatrix}^T
+\end{align}
+where $ \omega_{\mathbf{x}_{GPS}} = \omega_{\mathbf{y}_{GPS}} = \text{HDOP} = \sqrt{\sigma_x^2 + \sigma_y^2}$ and 
+$ \omega_{\boldsymbol \theta_{GPS}} = \pi/8 $ , experimentally derived.
+
+Measurement Matrix
+\begin{equation}
+H
+=
+\begin{bmatrix} 
+1 & 0 & 0 & 0 & 0 & 0 \\ 
+0 & 1 & 0 & 0 & 0 & 0 \\ 
+0 & 0 & 1 & 0 & 0 & 0 \\ 
+\end{bmatrix}
+\end{equation}
+
+Measurement Jacobian Matrix
+\begin{equation}
+J_H
+=
+\begin{bmatrix} 
+1 & 0 & 0 & 0 & 0 & 0 \\ 
+0 & 1 & 0 & 0 & 0 & 0 \\ 
+0 & 0 & 1 & 0 & 0 & 0 \\ 
+\end{bmatrix}
+\end{equation}
+
+\subsubsection{Wheel Encoder}
+
+After the derivation of $\Delta_{\textbf{s}}$ and $\Delta_{\boldsymbol \theta}$ as defined in the Appendix 
+
+\begin{align}
+\mathbf{x}_{Enc_t} & = \mathbf{x}_{t} + \Delta_{\textbf{s}} \cdot \cos(\boldsymbol \theta_{t}) \\
+\mathbf{y}_{Enc_t} & = \mathbf{y}_{t} + \Delta_{\textbf{s}} \cdot \sin(\boldsymbol \theta_{t}) \\
+\boldsymbol \theta_{Enc_t} & = \boldsymbol \theta_{t} + \Delta_{\boldsymbol \theta}
+\end{align}
+
+
+Measurements vector with uncertainty vector
+\begin{align}
+\mathbf{Z}
+=
+\begin{bmatrix} 
+\mathbf{x}_{GPS_t} \\ 
+\mathbf{y}_{GPS_t} \\ 
+\boldsymbol \theta_{GPS_t} \\ 
+\end{bmatrix}^T
+& \quad
+\mathbf{R}
+=
+\begin{bmatrix} 
+\omega_{\mathbf{x}_{Enc}} \\ 
+\omega_{\mathbf{y}_{Enc}} \\ 
+\omega_{\boldsymbol \theta_{Enc}} \\ 
+\end{bmatrix}^T
+\end{align}
+where $ \omega_{\mathbf{x}_{Enc}} = \omega_{\mathbf{y}_{Enc}} = 1$ and 
+$ \omega_{\boldsymbol \theta_{Enc}} = \pi/180 $ , experimentally derived.
+
+
+Measurement Matrix
+\begin{equation}
+H
+=
+\begin{bmatrix} 
+1 & 0 & 0 & 0 & 0 & 0 \\ 
+0 & 1 & 0 & 0 & 0 & 0 \\ 
+0 & 0 & 1 & 0 & 0 & 0 \\ 
+\end{bmatrix}
+\end{equation}
+
+Measurement Jacobian Matrix
+\begin{equation}
+J_H
+=
+\begin{bmatrix} 
+1 & 0 & 0 & 0 & 0 & 0 \\ 
+0 & 1 & 0 & 0 & 0 & 0 \\ 
+0 & 0 & 1 & 0 & 0 & 0 \\ 
+\end{bmatrix}
+\end{equation}
+
+
+\subsubsection{IMU}
+
+Measurements vector, as obtained by IMU, with uncertainty vector
+\begin{align}
+\mathbf{Z}
+=
+\begin{bmatrix} 
+\dot{\boldsymbol \theta }_{IMU_t} \\ 
+\mathbf{a}_{IMU_t} \\ 
+\end{bmatrix}^T
+& \quad
+\mathbf{R}
+=
+\begin{bmatrix} 
+\omega_{\dot{\boldsymbol \theta}_{IMU}} \\ 
+\omega_{\mathbf{a}_{IMU}} \\ 
+\end{bmatrix}^T
+\end{align}
+where $ \omega_{\dot{\boldsymbol \theta}_{IMU}} = 1$ and 
+$ \omega_{\mathbf{a}_{IMU}} = 4 $ , experimentally derived.
+
+
+Measurement Matrix
+\begin{equation}
+H
+=
+\begin{bmatrix} 
+0 & 0 & 0 & 0 & 1 & 0 \\ 
+0 & 0 & 0 & 0 & 0 & 1 \\ 
+\end{bmatrix}
+\end{equation}
+
+Measurement Jacobian Matrix
+\begin{equation}
+J_H
+=
+\begin{bmatrix} 
+0 & 0 & 0 & 0 & 1 & 0 \\ 
+0 & 0 & 0 & 0 & 0 & 1 \\ 
+\end{bmatrix}
+\end{equation}
+
+\subsubsection{Visual Odometry}
+To be defined, probably will use all the odometry measurements $x$, $y$, $\theta$, $v$, $\dot \theta$
+
+\subsection{Update Step}
+
+Predicted using measurements matrix
+\begin{align}
+Z_p & = H \cdot X_p
+\end{align}
+
+Innovation
+\begin{align}
+Y & = Z - Z_p
+\end{align}
+
+Innovation Covariance
+\begin{align}
+S & = J_H \cdot P_p \cdot J_H^T + R
+\end{align}
+
+Kalman Gain with Pseudo Inverse ($^*$)
+\begin{align}
+K & = P_p \cdot J_H^T \cdot S^{*} 
+\end{align}
+
+State Update
+\begin{align}
+X_t & = X_p + K \cdot Y
+\end{align}
+
+Covariance Update
+\begin{align}
+P_t & = (I - K \cdot J_H) \cdot P_p
+\end{align}
+
+Joseph form Covariance Update to ensure $P_t$ is Positive Semi-definite
+\begin{align}
+P_t & = (I - K \cdot J_H) \cdot P_p \cdot (I - K \cdot J_H)^T + K \cdot R \cdot K^T
+\end{align}
+
+Ensure P is symmetric
+\begin{align}
+P_t & = \frac{P_t + P_t^T}{2}
+\end{align}
+
+
+
+
+\com{
+    \begin{lstlisting}[language={C}, caption={Hello world in C code}, label=lst:helloWorldInC]
+    int main() {
+    printf("hello, world");
+    return 0;
+    }
+    \end{lstlisting}
+}
+
+
+\com{
+    \lstset{extendedchars=true}
+    \begin{lstlisting}[language={Python}, caption={Using a python program to
+        access the KTH API to get all of the programs at KTH}, label=lst:programmes]
+    KOPPSbaseUrl = 'https://www.kth.se'
+    
+    def v1_get_programmes():
+        global Verbose_Flag
+        #
+        # Use the KOPPS API to get the data
+        # note that this returns XML
+        url = "{0}/api/kopps/v1/programme".format(KOPPSbaseUrl)
+        if Verbose_Flag:
+            print("url: " + url)
+        #
+        r = requests.get(url)
+        if Verbose_Flag:
+            print("result of getting v1 programme: {}".format(r.text))
+        #
+        if r.status_code == requests.codes.ok:
+            return r.text           # simply return the XML
+        #
+        return None
+    \end{lstlisting}
+}
+
+\cleardoublepage
+%\clearpage

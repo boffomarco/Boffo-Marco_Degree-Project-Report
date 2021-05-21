@@ -1,0 +1,217 @@
+
+\appendix
+\renewcommand{\chaptermark}[1]{\markboth{Appendix \thechapter\relax:\thinspace\relax#1}{}}
+
+\chapter{Model of the sensors}
+
+
+\section{Kinematic Model}
+\noindent
+$$
+  \label{eq:state}
+\mathbf{X}_t=
+\begin{bmatrix} 
+\mathbf{x}_t \\ \mathbf{y}_t \\ \boldsymbol \theta_t \\ \mathbf{v}_t \\ \dot{\boldsymbol \theta}_t \\ \mathbf{a}_t \\[0.3em]
+\end{bmatrix}
+$$
+
+\begin{equation}
+A_t
+=
+\begin{bmatrix} 
+1 & 0 & 0 & dt \cdot \cos(\boldsymbol \theta_t) & 0 & \frac{dt^2 \cdot \cos(\boldsymbol \theta_t)}{2} \\ 
+0 & 1 & 0 & dt \cdot \sin(\boldsymbol \theta_t)& 0 & \frac{dt^2 \cdot \sin(\boldsymbol \theta_t)}{2} \\ 
+0 & 0 & 1 & 0 & dt & 0 \\ 
+0 & 0 & 0 & 1 & 0 & dt \\ 
+0 & 0 & 0 & 0 & 1 & 0 \\ 
+0 & 0 & 0 & 0 & 0 & 1 \\[0.3em]
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+    \mathbf{X}_t = A \cdot \mathbf{X}_{t-1}
+\end{equation}
+
+\section{Wheel Encoder information}
+
+$$
+Wheel~meter~per~tick = \frac{( 2 \cdot \pi ) \cdot ( \frac{Wheel~diameter}{2}) }{Wheel~Pulses~per~turn}
+$$
+
+
+$$
+\Delta _{PulsesRight} = Right~Pulses - Previous~Right~Pulses
+$$
+$$
+\Delta _{PulsesLeft}  = Left~Pulses  - Previous~Left~Pulses
+$$
+
+
+$$
+\Delta _{Right} ~ = \Delta _{PulsesRight} \cdot Wheel~meter~per~tick
+$$
+$$
+\Delta _{Left} ~ = \Delta _{PulsesLeft} \cdot Wheel~meter~per~tick
+$$
+
+$$
+\Delta s = \frac{\Delta _{Right} + \Delta _{Left}}{2}
+$$
+
+
+$$
+\Delta {\theta} = \frac{\Delta _{Right} - \Delta _{Left}}{Base~Width}
+$$
+
+\subsection{Euler Encoder Model}
+
+\noindent This is the integration method adopted. It is a precise enough approximation of the 
+$$
+x_{t+1} = x_t + \Delta s \cdot cos(\theta_t)
+$$
+$$
+y_{t+1} = y_t + \Delta s \cdot sin(\theta_t)
+$$
+$$
+\theta_{t+1} = \theta_t + \Delta {\theta}
+$$
+
+\subsection{Runge-Kutta 2 Encoder Model}
+
+\noindent It is supposed to be slightly more precise, but since the improvements at such an high frequency are non relevant then it is not considered.
+$$
+x_{t+1} = x_t + \Delta s \cdot cos(\theta_t + \frac{\Delta{\theta}}{2} )
+$$
+$$
+y_{t+1} = y_t + \Delta s \cdot sin(\theta_t + \frac{\Delta{\theta}}{2} )
+$$
+$$
+\theta_{t+1} = \theta_t + \Delta {\theta}
+$$
+
+
+
+
+\section{Camera}
+\noindent
+From images to odometry
+
+
+
+\section{GPS}
+\noindent
+From geodetic coordinates to ENU coordinates, as specified by ROS REP 103 and 105.
+
+Using \com{the tool pymap3d\footnote{https://github.com/geospace-code/pymap3d} or} specific math equations derived by Vincenty solutions of geodesics on the ellipsoid\footnote{Vincenty's formulae  -  Direct and Inverse solutions of geodesics on the ellipsoid with application of nested equations}, through the function geodetic2enu that computest the difference between the initial gps average position of the base station and the current reading obtained by the GPS receiver.
+
+First a translation from the geodetic coordinates in WSG-84 degrees estimated by the GPS receiver sensors to the ECEF coordinates is implemented, it is done so both for the initial coordinate and then used to check the difference with the ECEF translation from the geodetic coordinates of the successive reading of the GPS receiver.
+
+
+%GPS positioning is in the global coordinate system WGS84 [18]. 
+    
+From World Geodetic System: WGS 84 values 
+\begin{align}
+    EqR &= 6378137 && \text{Equatorial radius (m)} \\
+    PoR &= 6356752.3142 && \text{Polar radius (m)} 
+\end{align}
+
+From which the following can be derived the following values necessary for the next algorithms:
+\begin{align}
+    f &= \frac{EqR - PoR}{EqR} \\
+    e\_sq &= f \cdot (2-f) 
+\end{align}
+
+Using these values it is possible to transform from Geodetic WSG-84 Coordinates to ECEF coordinates using the  Algorithm specified in \ref{alg:ecef}.
+
+
+\begin{algorithm}[H]
+\caption{Geodetic to ECEF Coordinates }
+\label{alg:ecef}
+  \hspace*{\algorithmicindent} \textbf{Input:} Latitude and Longitude ($lat$, $lon$) in WSG-84 degrees\\
+  \hspace*{4em} Altitude ($h$) in meters\\
+  \hspace*{\algorithmicindent} \textbf{Output:} ECEF Coordinates in meters ($x$, $y$, $z$)
+  %\KwData{Testing set $x$}
+  %$\sum_{i=1}^{\infty} := 0$ \tcp*{this is a comment}
+  %\tcc{Transform latitude and longitude}
+  \begin{algorithmic}[1]
+  \STATE $N = \cfrac{EqR}{\sqrt{1 - e\_sq \cdot sin(lat)^2}}$
+  \STATE $x = (h + N) \cdot sin(lat) \cdot cos(lon)$
+  \STATE $y = (h + N) \cdot cos(lat) \cdot sin(lon)$
+  \STATE $z = (h + (1 - e\_sq) \cdot N) \cdot sin(lat)$
+  \STATE return $x$, $y$, $z$
+    \end{algorithmic}
+\end{algorithm}
+
+Finally, by exploiting the previous algorithm, it is possible to transform the Current Geodetic Coordinates into Local Coordinates by using some Reference Geodetic Coordinates and the following Algorithm \ref{alg:local}. 
+
+\begin{algorithm}[H]
+\caption{Geodetic to Local using Current and Reference Coordinates}
+\label{alg:local}
+    \hspace*{\algorithmicindent} \textbf{Input:} Current Latitude and Longitude ($latC$, $lonC$)\\       
+        \hspace*{5em} in WSG-84 degrees\\
+    \hspace*{4em} Current Altitude ($hC$) in meters\\
+    \hspace*{4em} Reference Latitude and Longitude ($latR$, $lonR$)\\    
+        \hspace*{5em} in WSG-84 degrees\\
+    \hspace*{4em} Reference Altitude ($hR$) in meters \\
+    \hspace*{\algorithmicindent} \textbf{Output:} Local Coordinates in meters ($\Delta x$, $\Delta y$, $\Delta z$)
+  \begin{algorithmic}[1]
+    \STATE $xC$, $yC$, $zC$ = Geodetic to ECEF Coordinates ($latC$, $lonC$, $hC$)
+    \STATE $xR$, $yR$, $zR$ = Geodetic to ECEF Coordinates ($latR$, $lonR$, $hR$)
+    \STATE $xD = xC - xR$
+    \STATE $yD = yC - yR$
+    \STATE $zD = zC - zR$
+    \STATE $\Delta x = -~sin(lonR)~\cdot~xD~+~cos(latR)~\cdot~yD$
+    \STATE $\Delta y = -~cos(lonR)~\cdot~sin(latR)~\cdot~xD~-~sin(latR)~\cdot~sin(lonR)~\cdot~yD~+ \hspace*{3em} cos(latR)~\cdot~zD$
+    \STATE $\Delta z = cos(latR)~\cdot~cos(lonR)~\cdot~xD~+~cos(latR)~\cdot~sin(lonR)~\cdot~yD~+  \hspace*{3em} sin(latR)~\cdot~zD$
+    \STATE return $\Delta x$, $\Delta y$, $\Delta z$
+    \end{algorithmic}
+    
+\end{algorithm}
+
+
+\section{IMU}
+
+\noindent
+As IMU sensor we use the PhidgetSpatial Precision 3/3/3 High Resolution \footnote{https://www.phidgets.com/?tier=3\&catid=10\&pcid=8\&prodid=1158}.
+We use its APIs to gather the measurements and then publish them as ROS topics, after some tunings.
+
+
+\chapter{Repository}
+
+Everything that has been developed during this thesis could be found in \url{https://github.com/boffomarco/hrp}
+
+The following have been developed:
+
+sensors.launch
+
+imus\_basic.launch
+
+gps.launch
+
+gps.cpp
+
+BatchEKF.launch
+
+BatchEKF\_last.py
+
+BatchEKF\_lastRPi.py
+
+BatchEKF\_lastSimulated.py
+
+GroundTruthSimulated.py
+
+plot\_histogram.py
+
+gps\_plot.py
+
+OccupancyGrid.py
+
+RS\_camera.launch
+
+rtabmap.launch
+
+.bashrc
+
+
+
+\chapter{Something Extra}

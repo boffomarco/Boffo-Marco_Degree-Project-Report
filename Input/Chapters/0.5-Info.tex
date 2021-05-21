@@ -1,0 +1,33 @@
+
+% Set depth of table of content to not care about subsections and lower
+\setcounter{tocdepth}{1}
+
+\tableofcontents
+  \markboth{\contentsname}{}
+%\cleardoublepage
+\clearpage
+
+%\listoffigures
+%\cleardoublepage
+%\clearpage
+
+%\listoftables
+%\cleardoublepage
+%\clearpage
+
+%\listofalgorithms
+%\cleardoublepage
+%\clearpage
+
+
+%\lstlistoflistings\todo{If you have listings in your thesis.}
+%\cleardoublepage
+%\clearpage
+
+
+%% Acronyms
+\input{Input/acronyms}     %load the acronyms file
+\printglossary[type=\acronymtype, title={List of acronyms and abbreviations}]
+\todo[inline]{The list of acronyms and abbreviations should be in alphabetical order based on the spelling of the acronym or abbreviation.
+}
+\label{pg:lastPageofPreface}

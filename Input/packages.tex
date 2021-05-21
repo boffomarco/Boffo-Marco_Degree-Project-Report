@@ -1,0 +1,184 @@
+%%
+%% forked from https://gits-15.sys.kth.se/giampi/kthlatex kthlatex-0.2rc4 on 2020-02-13
+%% expanded upon by Gerald Q. Maguire Jr.
+%% This template has been adapted by Anders Sjögren to the University
+%% Engineering Program in Computer Science at KTH ICT. Adaptation is the
+%% translation of English headings into Swedish as the addition of Swedish
+%% text. Original body text is deliberately left in English.
+
+
+%% set the default language to english or swedish by passing an option to the documentclass - this handles the inside tile page
+%\documentclass[english]{kththesis}
+
+
+% \usepackage[style=numeric,sorting=none,backend=biber]{biblatex}
+
+\setlength {\marginparwidth }{2cm} %leave some extra space for todo notes
+\usepackage{todonotes}
+
+\usepackage[perpage,para,symbol]{footmisc} %% use symbols to ``number'' footnotes and reset which symbol is used first on each page
+
+%% Reduce hyphenation as much as possible
+\hyphenpenalty=15000 
+\tolerance=1000
+
+%%----------------------------------------------------------------------------
+%%   pcap2tex stuff
+%%----------------------------------------------------------------------------
+%\usepackage[dvipsnames*,svgnames]{xcolor} %% For extended colors
+\usepackage{tikz}
+\usetikzlibrary{arrows,decorations.pathmorphing,backgrounds,fit,positioning,calc,shapes}
+\usepackage{pgfmath}	% --math engine
+
+
+\usepackage{tabularx} % Table
+\usepackage{booktabs} % TopRule usage
+\usepackage{multirow} 
+\usepackage{array}
+
+
+%% some additional useful packages
+\usepackage{rotating}		%% For text rotating
+\usepackage{array}		%% For table wrapping
+\usepackage{graphicx}	        %% Support for images
+\usepackage{float}		%% Suppor for more flexible floating box positioning
+\usepackage{mdwlist}            %% various list-related commands
+\usepackage{setspace}           %% For fine-grained control over line spacing
+\usepackage{listings}		%% For source code listing
+\usepackage{bytefield}          %% For packet drawings
+\usepackage{tabularx}		%% For simple table stretching
+\usepackage{multirow}	        %% Support for multirow colums in tables
+
+\usepackage{url}                %% Support for breaking URLs
+\usepackage{hyperref}
+\usepackage[all]{hypcap}	%% prevents an issue related to hyperref and caption linking
+%% setup hyperref to use the darkblue color on links
+\hypersetup{colorlinks,breaklinks,
+            linkcolor=darkblue,urlcolor=darkblue,
+            anchorcolor=darkblue,citecolor=darkblue}
+
+
+%% If you are going to include source code (or code snippets)
+\usepackage{listings}
+%%\usepackage[cache=false]{minted} %% For source code highlighting
+%%\usemintedstyle{borland}
+
+\usepackage{csquotes} % Recommended by biblatex
+
+
+
+
+
+
+\usepackage{setspace} % space for revision
+%\singlespace  % interlinea singola
+%\onehalfspace  % interlinea 1.5
+%\doublespace  % interlinea doppia
+
+\usepackage{indentfirst} 	% Always indent the paragraph
+\usepackage{graphicx}		% Support for images
+\usepackage{float}			% Suppor for more flexible floating box positioning
+\usepackage{setspace}   	% For fine-grained control over line spacing
+\usepackage{textcomp}   	% Angle symbol  
+\usepackage{url}       		% Support for breaking URLs
+\usepackage{hyperref}		% Link things in the document
+\usepackage[all]{hypcap}	% Prevents an issue related to hyperref and caption linking
+\hypersetup{colorlinks,     % Cliccable things are darkblue -> color need to be defined
+			breaklinks,  
+			linkcolor=darkblue,
+			urlcolor=darkblue,
+			anchorcolor=darkblue,
+			citecolor=darkblue}
+\usepackage[perpage,para,symbol]{footmisc} % use symbols to ``number'' footnotes and reset which symbol is used first on each page
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Tikz package
+\usepackage{tikz,fp,ifthen}
+\usepackage{pgfmath}
+\usetikzlibrary{backgrounds}
+\usetikzlibrary{decorations.pathmorphing,backgrounds,fit,calc,through}
+\usetikzlibrary{arrows}
+\usetikzlibrary{decorations,shadows}
+\usetikzlibrary{fadings}
+\usetikzlibrary{patterns}
+\usetikzlibrary{mindmap}
+\usetikzlibrary{decorations.text}
+\usetikzlibrary{decorations.shapes}
+
+\usetikzlibrary{shapes.geometric, arrows}
+\usetikzlibrary{arrows.meta, positioning}
+\usetikzlibrary{arrows}
+
+\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm, text width=3cm,text centered, draw=black] %, fill=red!30
+\tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=1cm, text width=3cm, text centered, draw=black] % , fill=orange!30
+\tikzstyle{decision} = [circle, thick, minimum width=3cm, minimum height=1cm, text width=3cm, text centered, draw=black] %, fill=green!30]
+
+\tikzstyle{arrow} = [thick,->,>=stealth]
+\tikzstyle{line} = [thick,>=stealth]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+% Captions - fix it, it shouldn't be only centered
+\usepackage{caption}
+\DeclareCaptionFormat{citation}{%
+	\ifx\captioncitation\relax\relax\else
+	\captioncitation\par
+	\fi
+	#1#2#3\par}
+\newcommand*\setcaptioncitation[1]{\def\captioncitation{\centering\textit{Source:}~#1}}
+\let\captioncitation\relax
+\captionsetup{format=plain, font=small, labelfont=bf, justification=justified} % format=citation for working with source
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+% New line / New paragraph paramethers
+\hyphenpenalty=15000 			% No words finiscing and restrating after -
+\tolerance=1000
+\setlength{\parindent}{24pt}    % Paragraph indentation and paragraph spacing
+\setlength{\parskip}{0em}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%% New colors, darkblue is useful in hyperref
+\definecolor{darkblue}{rgb}{0.0,0.0,0.3} 
+\definecolor{darkred}{rgb}{0.4,0.0,0.0}
+\definecolor{red}{rgb}{0.7,0.0,0.0}
+\definecolor{lightgrey}{rgb}{0.8,0.8,0.8} 
+\definecolor{grey}{rgb}{0.6,0.6,0.6}
+\definecolor{darkgrey}{rgb}{0.4,0.4,0.4}
+\definecolor{aqua}{rgb}{0.0, 1.0, 1.0}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%% Acronyms
+% note that nonumberlist - removes the cross references to the pages where the acronym appears
+% note that nomain - does not produce a main gloassay, this only acronyms will be in the glossary
+% note that nopostdot - will present there being a period at the end of each entry
+\usepackage[acronym, section=section, sort=def, nonumberlist, nomain, nopostdot]{glossaries}
+\glsdisablehyper
+\makeglossaries
+\input{Input/acronyms.tex} % load the acronyms file
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%% definition of new command for bytefield package
+\newcommand{\colorbitbox}[3]{%
+	\rlap{\bitbox{#2}{\color{#1}\rule{\width}{\height}}}%
+	\bitbox{#2}{#3}}
+
+%\usepackage[pdfpagelabels]{hyperref}
+
+
+% Command to write comments
+\newcommand{\com}[1]{}
+
+
+%\usepackage[ruled,vlined]{algorithm2e}
+%\usepackage{algorithm2e}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+%%% Coloring the comment as blue
+%\newcommand\mycommfont[1]{\footnotesize\ttfamily\textcolor{blue}{#1}}
+%\SetCommentSty{mycommfont}
+
+%\SetKwInput{KwInput}{Input}                % Set the Input
+%\SetKwInput{KwOutput}{Output}              % set the Output
+
+\usetikzlibrary{arrows}
