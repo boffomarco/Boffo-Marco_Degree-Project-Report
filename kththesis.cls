@@ -44,10 +44,10 @@
   \RequirePackage{polyglossia}
   \ifinswedish
     \setmainlanguage{swedish}
-    \setotherlanguage[variant=us]{english}
+    \setotherlanguage[variant=uk]{english}
     \setotherlanguages{italian}
   \else
-    \setmainlanguage[variant=us]{english}
+    \setmainlanguage[variant=uk]{english}
     \setotherlanguages{swedish,italian}
     %\setotherlanguage{swedish}
   \fi
@@ -357,7 +357,7 @@
   \else
     \@programme\\
     \ifx\@date\@empty\relax\else Date: \@date\\ \vspace{5mm} \fi
-    
+
     \ifx\@supervisorBsLastname\@empty
     Supervisor: \@supervisorAsFirstname\space\@supervisorAsLastname
         \else
@@ -388,7 +388,7 @@
 \thispagestyle{empty}
 \begin{flushleft}
   \sffamily
-  \copyright\enspace\the\year\quad\@authorsFirstname\space\@authorsLastname 
+  \copyright\enspace\the\year\quad\@authorsFirstname\space\@authorsLastname
   \ifx\@secondAuthorsLastname\@empty\relax
   \else
     \ifinswedish
@@ -451,7 +451,7 @@
 %    "Title":{
 %	"Main title": "This is a long title in English",
 %	"Subtitle": "This is an even longer subtitle in English",
-%	"Language": "eng"	
+%	"Language": "eng"
 %    },
 %    "Alternative title":{
 %	"Main title": "Detta är en lång titel på svenska",

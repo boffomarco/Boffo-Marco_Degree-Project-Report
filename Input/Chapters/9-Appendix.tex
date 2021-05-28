@@ -1,7 +1,7 @@
 
 \appendix
 \renewcommand{\chaptermark}[1]{\markboth{Appendix \thechapter\relax:\thinspace\relax#1}{}}
-
+\com{
 \chapter{Model of the sensors}
 
 
@@ -10,20 +10,20 @@
 $$
   \label{eq:state}
 \mathbf{X}_t=
-\begin{bmatrix} 
-\mathbf{x}_t \\ \mathbf{y}_t \\ \boldsymbol \theta_t \\ \mathbf{v}_t \\ \dot{\boldsymbol \theta}_t \\ \mathbf{a}_t \\[0.3em]
+\begin{bmatrix}
+\mathbf{x}_t \\ \mathbf{y}_t \\ \boldsymbol \theta_t \\ \mathbf{v}_t \\ \boldsymbol \omega_t \\ \mathbf{a}_t \\[0.3em]
 \end{bmatrix}
 $$
 
 \begin{equation}
 A_t
 =
-\begin{bmatrix} 
-1 & 0 & 0 & dt \cdot \cos(\boldsymbol \theta_t) & 0 & \frac{dt^2 \cdot \cos(\boldsymbol \theta_t)}{2} \\ 
-0 & 1 & 0 & dt \cdot \sin(\boldsymbol \theta_t)& 0 & \frac{dt^2 \cdot \sin(\boldsymbol \theta_t)}{2} \\ 
-0 & 0 & 1 & 0 & dt & 0 \\ 
-0 & 0 & 0 & 1 & 0 & dt \\ 
-0 & 0 & 0 & 0 & 1 & 0 \\ 
+\begin{bmatrix}
+1 & 0 & 0 & dt \cdot \cos(\boldsymbol \theta_t) & 0 & \frac{dt^2 \cdot \cos(\boldsymbol \theta_t)}{2} \\
+0 & 1 & 0 & dt \cdot \sin(\boldsymbol \theta_t)& 0 & \frac{dt^2 \cdot \sin(\boldsymbol \theta_t)}{2} \\
+0 & 0 & 1 & 0 & dt & 0 \\
+0 & 0 & 0 & 1 & 0 & dt \\
+0 & 0 & 0 & 0 & 1 & 0 \\
 0 & 0 & 0 & 0 & 0 & 1 \\[0.3em]
 \end{bmatrix}
 \end{equation}
@@ -65,12 +65,12 @@ $$
 
 \subsection{Euler Encoder Model}
 
-\noindent This is the integration method adopted. It is a precise enough approximation of the 
+\noindent This is the integration method adopted. It is a precise enough approximation of the
 $$
-x_{t+1} = x_t + \Delta s \cdot cos(\theta_t)
+x_{t+1} = x_t + \Delta s \cdot \cos(\theta_t)
 $$
 $$
-y_{t+1} = y_t + \Delta s \cdot sin(\theta_t)
+y_{t+1} = y_t + \Delta s \cdot \sin(\theta_t)
 $$
 $$
 \theta_{t+1} = \theta_t + \Delta {\theta}
@@ -80,21 +80,16 @@ $$
 
 \noindent It is supposed to be slightly more precise, but since the improvements at such an high frequency are non relevant then it is not considered.
 $$
-x_{t+1} = x_t + \Delta s \cdot cos(\theta_t + \frac{\Delta{\theta}}{2} )
+x_{t+1} = x_t + \Delta s \cdot \cos(\theta_t + \frac{\Delta{\theta}}{2} )
 $$
 $$
-y_{t+1} = y_t + \Delta s \cdot sin(\theta_t + \frac{\Delta{\theta}}{2} )
+y_{t+1} = y_t + \Delta s \cdot \sin(\theta_t + \frac{\Delta{\theta}}{2} )
 $$
 $$
 \theta_{t+1} = \theta_t + \Delta {\theta}
 $$
 
 
-
-
-\section{Camera}
-\noindent
-From images to odometry
 
 
 
@@ -107,18 +102,18 @@ Using \com{the tool pymap3d\footnote{https://github.com/geospace-code/pymap3d} o
 First a translation from the geodetic coordinates in WSG-84 degrees estimated by the GPS receiver sensors to the ECEF coordinates is implemented, it is done so both for the initial coordinate and then used to check the difference with the ECEF translation from the geodetic coordinates of the successive reading of the GPS receiver.
 
 
-%GPS positioning is in the global coordinate system WGS84 [18]. 
-    
-From World Geodetic System: WGS 84 values 
+%GPS positioning is in the global coordinate system WGS84 [18].
+
+From World Geodetic System: WGS 84 values
 \begin{align}
     EqR &= 6378137 && \text{Equatorial radius (m)} \\
-    PoR &= 6356752.3142 && \text{Polar radius (m)} 
+    PoR &= 6356752.3142 && \text{Polar radius (m)}
 \end{align}
 
 From which the following can be derived the following values necessary for the next algorithms:
 \begin{align}
     f &= \frac{EqR - PoR}{EqR} \\
-    e\_sq &= f \cdot (2-f) 
+    e\_sq &= f \cdot (2-f)
 \end{align}
 
 Using these values it is possible to transform from Geodetic WSG-84 Coordinates to ECEF coordinates using the  Algorithm specified in \ref{alg:ecef}.
@@ -126,7 +121,7 @@ Using these values it is possible to transform from Geodetic WSG-84 Coordinates 
 
 \begin{algorithm}[H]
 \caption{Geodetic to ECEF Coordinates }
-\label{alg:ecef}
+\label{alg:ecefApp}
   \hspace*{\algorithmicindent} \textbf{Input:} Latitude and Longitude ($lat$, $lon$) in WSG-84 degrees\\
   \hspace*{4em} Altitude ($h$) in meters\\
   \hspace*{\algorithmicindent} \textbf{Output:} ECEF Coordinates in meters ($x$, $y$, $z$)
@@ -134,23 +129,23 @@ Using these values it is possible to transform from Geodetic WSG-84 Coordinates 
   %$\sum_{i=1}^{\infty} := 0$ \tcp*{this is a comment}
   %\tcc{Transform latitude and longitude}
   \begin{algorithmic}[1]
-  \STATE $N = \cfrac{EqR}{\sqrt{1 - e\_sq \cdot sin(lat)^2}}$
-  \STATE $x = (h + N) \cdot sin(lat) \cdot cos(lon)$
-  \STATE $y = (h + N) \cdot cos(lat) \cdot sin(lon)$
-  \STATE $z = (h + (1 - e\_sq) \cdot N) \cdot sin(lat)$
+  \STATE $N = \cfrac{EqR}{\sqrt{1 - e\_sq \cdot \sin(lat)^2}}$
+  \STATE $x = (h + N) \cdot \sin(lat) \cdot \cos(lon)$
+  \STATE $y = (h + N) \cdot \cos(lat) \cdot \sin(lon)$
+  \STATE $z = (h + (1 - e\_sq) \cdot N) \cdot \sin(lat)$
   \STATE return $x$, $y$, $z$
     \end{algorithmic}
 \end{algorithm}
 
-Finally, by exploiting the previous algorithm, it is possible to transform the Current Geodetic Coordinates into Local Coordinates by using some Reference Geodetic Coordinates and the following Algorithm \ref{alg:local}. 
+Finally, by exploiting the previous algorithm, it is possible to transform the Current Geodetic Coordinates into Local Coordinates by using some Reference Geodetic Coordinates and the following Algorithm \ref{alg:local}.
 
 \begin{algorithm}[H]
 \caption{Geodetic to Local using Current and Reference Coordinates}
-\label{alg:local}
-    \hspace*{\algorithmicindent} \textbf{Input:} Current Latitude and Longitude ($latC$, $lonC$)\\       
+\label{alg:localApp}
+    \hspace*{\algorithmicindent} \textbf{Input:} Current Latitude and Longitude ($latC$, $lonC$)\\
         \hspace*{5em} in WSG-84 degrees\\
     \hspace*{4em} Current Altitude ($hC$) in meters\\
-    \hspace*{4em} Reference Latitude and Longitude ($latR$, $lonR$)\\    
+    \hspace*{4em} Reference Latitude and Longitude ($latR$, $lonR$)\\
         \hspace*{5em} in WSG-84 degrees\\
     \hspace*{4em} Reference Altitude ($hR$) in meters \\
     \hspace*{\algorithmicindent} \textbf{Output:} Local Coordinates in meters ($\Delta x$, $\Delta y$, $\Delta z$)
@@ -160,14 +155,24 @@ Finally, by exploiting the previous algorithm, it is possible to transform the C
     \STATE $xD = xC - xR$
     \STATE $yD = yC - yR$
     \STATE $zD = zC - zR$
-    \STATE $\Delta x = -~sin(lonR)~\cdot~xD~+~cos(latR)~\cdot~yD$
-    \STATE $\Delta y = -~cos(lonR)~\cdot~sin(latR)~\cdot~xD~-~sin(latR)~\cdot~sin(lonR)~\cdot~yD~+ \hspace*{3em} cos(latR)~\cdot~zD$
-    \STATE $\Delta z = cos(latR)~\cdot~cos(lonR)~\cdot~xD~+~cos(latR)~\cdot~sin(lonR)~\cdot~yD~+  \hspace*{3em} sin(latR)~\cdot~zD$
+    \STATE $\Delta x = -~\sin(lonR)~\cdot~xD~+~\cos(latR)~\cdot~yD$
+    \STATE $\Delta y = -~cos(lonR)~\cdot~\sin(latR)~\cdot~xD~-~\sin(latR)~\cdot~\sin(lonR)~\cdot~yD~+ \hspace*{3em} \cos(latR)~\cdot~zD$
+    \STATE $\Delta z = \cos(latR)~\cdot~\cos(lonR)~\cdot~xD~+~\cos(latR)~\cdot~\sin(lonR)~\cdot~yD~+  \hspace*{3em} \sin(latR)~\cdot~zD$
     \STATE return $\Delta x$, $\Delta y$, $\Delta z$
     \end{algorithmic}
-    
+
 \end{algorithm}
 
+\com{
+\begin{figure}
+	\begin{center}
+		%\includegraphics{Images/4-Methods/Figure_2.png.eps}
+		%\includesvg{Images/4-Methods/Figure_2.png.svg}
+		%\input{Images/4-Methods/Original-Fig-GPSfix.pgf}
+	\end{center}
+	\caption{A PGF histogram from \texttt{matplotlib}.}
+\end{figure}
+}
 
 \section{IMU}
 
@@ -175,20 +180,43 @@ Finally, by exploiting the previous algorithm, it is possible to transform the C
 As IMU sensor we use the PhidgetSpatial Precision 3/3/3 High Resolution \footnote{https://www.phidgets.com/?tier=3\&catid=10\&pcid=8\&prodid=1158}.
 We use its APIs to gather the measurements and then publish them as ROS topics, after some tunings.
 
+\section{Camera}
+
+\noindent The camera is the Intel RealSense D435 and the \gls{VO} package is \gls{RTABMAP}.
+
+}
 
 \chapter{Repository}
-
+\noindent
 Everything that has been developed during this thesis could be found in \url{https://github.com/boffomarco/hrp}
 
-The following have been developed:
+The following files are the main contributions provide in this thesis.
+
+\section{System Configuration}
+\noindent
+
+
+.bashrc
+
+network\_file
+\todo{Configuration of network settings between RPis and PC using ROS to be added in a file describing the procedure}
+
+\section{Localisation Configuration}
+\noindent The improved localisation performance are provided using a personalised configuration of the sensors and the related sensor fusion of their measures.
 
 sensors.launch
+
+automower\_safe.launch
 
 imus\_basic.launch
 
 gps.launch
 
 gps.cpp
+
+rs\_camera.launch
+
+rtabmap.launch
 
 BatchEKF.launch
 
@@ -200,18 +228,20 @@ BatchEKF\_lastSimulated.py
 
 GroundTruthSimulated.py
 
+\section{Mapping Configuration}
+\noindent
+
+OccupancyGrid.py
+
+\section{Results Configuration}
+\noindent
+
 plot\_histogram.py
 
 gps\_plot.py
 
-OccupancyGrid.py
-
-RS\_camera.launch
-
-rtabmap.launch
-
-.bashrc
 
 
 
-\chapter{Something Extra}
+
+%\chapter{Something Extra}

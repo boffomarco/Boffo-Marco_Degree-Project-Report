@@ -19,7 +19,7 @@
 \usepackage[perpage,para,symbol]{footmisc} %% use symbols to ``number'' footnotes and reset which symbol is used first on each page
 
 %% Reduce hyphenation as much as possible
-\hyphenpenalty=15000 
+\hyphenpenalty=15000
 \tolerance=1000
 
 %%----------------------------------------------------------------------------
@@ -33,7 +33,7 @@
 
 \usepackage{tabularx} % Table
 \usepackage{booktabs} % TopRule usage
-\usepackage{multirow} 
+\usepackage{multirow}
 \usepackage{array}
 
 
@@ -79,12 +79,12 @@
 \usepackage{graphicx}		% Support for images
 \usepackage{float}			% Suppor for more flexible floating box positioning
 \usepackage{setspace}   	% For fine-grained control over line spacing
-\usepackage{textcomp}   	% Angle symbol  
+\usepackage{textcomp}   	% Angle symbol
 \usepackage{url}       		% Support for breaking URLs
 \usepackage{hyperref}		% Link things in the document
 \usepackage[all]{hypcap}	% Prevents an issue related to hyperref and caption linking
 \hypersetup{colorlinks,     % Cliccable things are darkblue -> color need to be defined
-			breaklinks,  
+			breaklinks,
 			linkcolor=darkblue,
 			urlcolor=darkblue,
 			anchorcolor=darkblue,
@@ -115,9 +115,9 @@
 
 \tikzstyle{arrow} = [thick,->,>=stealth]
 \tikzstyle{line} = [thick,>=stealth]
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Captions - fix it, it shouldn't be only centered
 \usepackage{caption}
 \DeclareCaptionFormat{citation}{%
@@ -128,25 +128,25 @@
 \newcommand*\setcaptioncitation[1]{\def\captioncitation{\centering\textit{Source:}~#1}}
 \let\captioncitation\relax
 \captionsetup{format=plain, font=small, labelfont=bf, justification=justified} % format=citation for working with source
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % New line / New paragraph paramethers
 \hyphenpenalty=15000 			% No words finiscing and restrating after -
 \tolerance=1000
 \setlength{\parindent}{24pt}    % Paragraph indentation and paragraph spacing
 \setlength{\parskip}{0em}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% New colors, darkblue is useful in hyperref
-\definecolor{darkblue}{rgb}{0.0,0.0,0.3} 
+\definecolor{darkblue}{rgb}{0.0,0.0,0.3}
 \definecolor{darkred}{rgb}{0.4,0.0,0.0}
 \definecolor{red}{rgb}{0.7,0.0,0.0}
-\definecolor{lightgrey}{rgb}{0.8,0.8,0.8} 
+\definecolor{lightgrey}{rgb}{0.8,0.8,0.8}
 \definecolor{grey}{rgb}{0.6,0.6,0.6}
 \definecolor{darkgrey}{rgb}{0.4,0.4,0.4}
 \definecolor{aqua}{rgb}{0.0, 1.0, 1.0}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Acronyms
 % note that nonumberlist - removes the cross references to the pages where the acronym appears
 % note that nomain - does not produce a main gloassay, this only acronyms will be in the glossary
@@ -155,8 +155,8 @@
 \glsdisablehyper
 \makeglossaries
 \input{Input/acronyms.tex} % load the acronyms file
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% definition of new command for bytefield package
 \newcommand{\colorbitbox}[3]{%
 	\rlap{\bitbox{#2}{\color{#1}\rule{\width}{\height}}}%
@@ -181,4 +181,15 @@
 %\SetKwInput{KwInput}{Input}                % Set the Input
 %\SetKwInput{KwOutput}{Output}              % set the Output
 
-\usetikzlibrary{arrows}
+
+\usetikzlibrary{arrows.meta,
+	chains,
+	positioning,
+	shapes.geometric,
+	shapes,positioning
+}
+
+
+\usepackage{subcaption}
+
+\usepackage{svg}

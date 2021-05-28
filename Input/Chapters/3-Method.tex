@@ -1,0 +1,654 @@
+\chapter{Methods}
+\label{ch:methods}
+
+DRAFT
+
+\noindent
+The localisation performances are defined by the sensor fusion approach, \gls{AEKF}.%, to exploit the measurements of the available sensors.
+
+The mapping approach is then defined using an Occupancy Grid relying on the more accurate pose estimation.
+The collision sensor is used to update the knowledge of the robot's environment.
+
+Finally, the evaluation configuration is defined, showing how the system developed is performing and how its performance are going to be evaluated.
+
+
+
+\section{Localisation Configuration}
+\label{sec:locConf}
+\noindent
+The localisation method is based on an \gls{AEKF}.
+Its implementation is hereby defined, starting from the Prediction phase, its measurements collection, and the Correction phase.
+%\begin{figure}[!ht]
+%  \begin{center}
+%    \includegraphics[width=0.25\textwidth]{Homepage-icon.png}
+%  \end{center}
+%  \caption{Homepage icon}
+%  \label{fig:homepageicon}
+%\end{figure}
+
+
+\subsection{ \gls{EKF} Prediction}
+
+\noindent
+As we are working in 2D, the state variables needed are the following:
+$$
+  \label{eq:state-transf}
+\mathbf{X}_t=
+\begin{bmatrix}
+\mathbf{x}_t & \mathbf{y}_t & \boldsymbol \theta_t & \mathbf{v}_t & \boldsymbol \omega_t & \mathbf{a}_t
+\end{bmatrix} ^T
+$$
+
+\subsubsection{Transition}
+
+\noindent
+\begin{equation}
+A_t
+=
+\begin{bmatrix}
+1 & 0 & 0 & \cos(\boldsymbol \theta_t) \cdot \Delta_t & 0 & \cos(\boldsymbol \theta_t) \cdot  \cfrac{\Delta_t^2 }{2} \\
+0 & 1 & 0 & \sin(\boldsymbol \theta_t) \cdot \Delta_t & 0 & \sin(\boldsymbol \theta_t) \cdot  \cfrac{\Delta_t^2 }{2} \\
+0 & 0 & 1 & 0 & \Delta_t & 0 \\
+0 & 0 & 0 & 1 & 0 & \Delta_t \\
+0 & 0 & 0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 0 & 0 & 1
+\end{bmatrix}
+\end{equation}
+
+
+\subsubsection{Control}
+
+\noindent
+\begin{align}
+B
+=
+    \begin{bmatrix}
+    0 & 0 \\
+    0 & 0\\
+    0 & 0\\
+    s_v & 0\\
+    0 & s_{ \dot{\boldsymbol \theta}}\\
+    0 & 0\\
+    0 & 0
+    \end{bmatrix}
+& \quad
+\mathbf{u}_t
+=
+    \begin{bmatrix}
+    \boldsymbol \Delta_{\mathbf{v}}  \\
+    \boldsymbol \Delta_{ \boldsymbol \omega} \\[0.3em]
+    \end{bmatrix}
+\end{align}
+where:
+  \begin{align}
+     \boldsymbol \Delta_{\mathbf{v}} = \text{Control}_{\mathbf{v}} - \mathbf{v}_t  \\
+    \boldsymbol \Delta_{\boldsymbol \omega} = \text{Control}_{\boldsymbol \omega} - \boldsymbol \omega_t
+  \end{align}
+$ \text{Control}_{\mathbf{v}}$ and  $\text{Control}_{\boldsymbol \omega}$ are the command sent to the robot, obtained by a specific topic.
+
+$s_{.}$ instead is used to make the transition from command received and actual actuation more smooth by limiting the innovation given by the respective control through a scaling value $s_. = 0.5$
+
+
+\subsubsection{Noise}
+
+\noindent
+The noise vector is defined as
+\begin{equation}
+\boldsymbol \eta
+=
+\begin{bmatrix}
+\eta_{\mathbf{x}}  &
+\eta_{\mathbf{y}} &
+\eta_{\boldsymbol \theta}  &
+\eta_{\mathbf{v}} &
+\eta_{\boldsymbol \omega} &
+\eta_{\mathbf{a}}
+\end{bmatrix} ^T
+\end{equation}
+where $\eta_i \sim \mathcal{N}(\mu_i,\,\sigma_{ii}^{2})$ with $\mu_i = 0$, $\sigma_{ii}^2 = 0.1$, and $ i = \{ \mathbf{x} , \mathbf{y} , \boldsymbol \theta , \mathbf{v} , \boldsymbol \omega , \mathbf{a} \}$
+
+The prediction step for the state variables is then the following
+\begin{equation}
+\mathbf{X}_{p} = A \cdot \mathbf{X}_t + B \cdot \mathbf{u}_t + \boldsymbol \eta
+\end{equation}
+
+Since we are dealing with an Extended Kalman Filter, the Jacobian of the transition matrix must be obtained to linearise the non-linear equations with a first order taylor expansion, obtaining :
+
+\begin{equation}
+J_A
+=
+\begin{bmatrix}
+
+1 & 0 & 0 & -\sin(\boldsymbol \theta_t) \cdot \Delta_t & 0 & -\sin(\boldsymbol \theta_t) \cdot  \frac{\Delta_t^2 }{2} \\
+0 & 1 & 0 & \cos(\boldsymbol \theta_t) \cdot \Delta_t & 0 & \cos(\boldsymbol \theta_t) \cdot  \frac{\Delta_t^2 }{2} \\
+0 & 0 & 1 & 0 & \Delta_t & 0 \\
+0 & 0 & 0 & 1 & 0 & \Delta_t \\
+0 & 0 & 0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 0 & 0 & 1
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+Q
+=
+\begin{bmatrix}
+\sigma_{\mathbf{xx}}^2 & 0 & 0 & 0 & 0 & 0 \\
+0 & \sigma_{\mathbf{yy}}^2 & 0 & 0 & 0 & 0 \\
+0 & 0 & \sigma_{\mathbf{\boldsymbol \theta \boldsymbol \theta}}^2 & 0 & 0 & 0 \\
+0 & 0 & 0 & \sigma_{\mathbf{vv}}^2 & 0 & 0 \\
+0 & 0 & 0 & 0 & \sigma_{{\boldsymbol \omega}{\boldsymbol \omega}}^2 & 0 \\
+0 & 0 & 0 & 0 & 0 & \sigma_{\mathbf{aa}}^2 \\
+\end{bmatrix}
+\end{equation}
+
+Finally the covariance matrix after prediction is:
+
+\begin{align}
+    P_{p} & = J_A \cdot P_t \cdot J_A^T + Q && \\
+    %P_{p} & =  \frac{P_{p} +  P_{p}^T}{2} && \text{To ensure symmetry}
+\end{align}
+
+
+\subsection{Adaptive Measurement Models}
+\noindent Check for new measurements in background and dynamically create the components for the update step
+
+
+\subsubsection{Wheel Encoder}
+
+\noindent
+After the derivation of $\mathbf{v}$ and $\boldsymbol \omega$ as defined in equation \eqref{eq:disp}:
+
+Through the usage of wheel encoders attached to both these wheels, an estimated velocity for them is calculated and used to determine its pose.
+This open-loop technique to determine the position and orientation is called \gls{DR}, as the new pose is estimated by using the last known pose and the new speed measurements.
+
+The wheel encoders attached on each wheel provide an estimate of the number of pulses they detected. These encoder pulses need to be translated to an approximated wheel displacement through the transformation constant $C_{D}$ provided by equation \ref{eq:wheel_meter}.
+\begin{equation}
+C_{D} = \frac{\pi \cdot W_D }{E_T}
+\label{eq:wheel_meter}
+\end{equation} where $W_D$ is the estimated length of the wheel diameter and $E_T$ is the encoder time resolution.
+This value is used to derive the velocity of each wheel separately, $\dot \delta_L$ and $\dot \delta_R$, by multiplying their encoder pulses, $E_L$ and  $E_R$ respectively, with transformation constant and dividing it using the time delay $\Delta_t$, as in equation \ref{eq:wheel_disp}.
+\begin{equation}
+\dot \delta_{L} = \frac{C_D \cdot E_L}{\Delta_t}  \qquad
+\dot \delta_{R} = \frac{C_D \cdot E_R}{\Delta_t}
+\label{eq:wheel_disp}
+\end{equation}
+
+Using these single wheel displacements, it is possible to calculate the linear velocity along the $x$ axis, $v$, and the angular velocity on the $z$ axis, $\omega$, with respect to the mobile robot frame using equations \ref{eq:disp}:
+\begin{equation}
+    v =\frac{\dot \delta_{R} + \dot \delta_{L} }{2} \qquad \omega = \frac{\dot \delta _{R} - \dot \delta_{L}}{B_W}
+\label{eq:disp}
+\end{equation} where $B_W$ is the estimated length of the base width of the back wheel axis.
+
+
+These forward kinematics equations of this differential drive mobile robot are used to update the pose of the mobile robot, from time $t$ after a time step $\Delta_t$ to time $t+1$, in the global coordinate frame with the Euler first-order differential approximation~\cite{braun_first-order_1993}, as shown in equation \ref{eq:eulerWheel}.
+
+\begin{equation}
+\begin{bmatrix} x_{t + 1} \\ y_{t + 1} \\ \theta _{t + 1} ~ \end{bmatrix}
+=
+\begin{bmatrix} {x_t} \\ {y_t} \\ {\theta _t}  \end{bmatrix}
++
+\begin{bmatrix}  \cos (\theta _t ) & 0\\  \sin (\theta _t ) & 0 \\ 0 & 1 \end{bmatrix}
+\cdot
+\begin{bmatrix} v \\ \omega \end{bmatrix} \cdot
+\Delta_t
+\label{eq:eulerWheel}
+\end{equation}
+
+
+This method however is subject to multiple errors and inaccuracies, as the measurements and time delays will never be perfect.
+The systematic errors can be given by imperfectness of robot model as impreciseness in the wheel diameters or wheel base measures, which are used to estimate the movements.
+However, the presence of non-systematic random errors as result of usage of imperfect measurements are more difficult to model, e.g. wheel slippage, uneven terrain, and external forces applied.
+The accumulative characteristic of these errors will break the stability of the system, making the estimate to drift after a period of time.
+These conditions render this \gls{DR} model not adequate to determine the pose of the mobile robot, but its estimate could be used anyway to improve the positioning system.
+
+
+
+
+\begin{align}
+\mathbf{v}_{Enc_t} & = \mathbf{v}\\
+\boldsymbol \omega_{Enc_t} & = \boldsymbol \omega
+\end{align}
+
+
+Measurements vector with uncertainty vector
+\begin{align}
+\mathbf{Z}
+=
+\begin{bmatrix}
+\mathbf{v}_{Enc_t} \\
+\boldsymbol \omega_{Enc_t}
+\end{bmatrix}^T
+& \quad
+\mathbf{R}
+=
+\begin{bmatrix}
+\eta_{\mathbf{v}_{Enc}} \\
+\eta_{\boldsymbol \omega}
+\end{bmatrix}^T
+\end{align}
+where $ \omega_{\mathbf{x}_{Enc}} = \omega_{\mathbf{y}_{Enc}} = 1$ and
+$ \omega_{\boldsymbol \theta_{Enc}} = \pi/180 $ , experimentally derived.
+
+
+Measurement Matrix
+\begin{equation}
+H
+=
+\begin{bmatrix}
+0 & 0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 0 & 1 & 0
+\end{bmatrix}
+\end{equation}
+
+Measurement Jacobian Matrix
+\begin{equation}
+J_H
+=
+\begin{bmatrix}
+0 & 0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 0 & 1 & 0
+\end{bmatrix}
+\end{equation}
+
+
+\subsubsection{GPS}
+
+\noindent The measures obtained by the \gls{GNSS} receiver are transformed from WSG-84 degrees to local coordinates as specified below.
+
+Using specific math equations derived by~\cite{Vincenty}, first a transformation from the geodetic coordinates in WSG-84 degrees estimated by the GPS receiver sensors to the ECEF coordinates is implemented.
+It is done so both for the initial coordinate and then used to check the difference with the ECEF translation from the geodetic coordinates of the successive reading of the GPS receiver.
+
+
+%GPS positioning is in the global coordinate system WGS84 [18].
+
+From World Geodetic System: WGS 84 values
+\begin{align}
+    EqR &= 6378137 && \text{Equatorial radius (m)} \\
+    PoR &= 6356752.3142 && \text{Polar radius (m)}
+\end{align}
+
+From which the following can be derived the following values necessary for the next algorithms:
+\begin{align}
+    f &= \frac{EqR - PoR}{EqR} \\
+    e\_sq &= f \cdot (2-f)
+\end{align}
+
+Using these values it is possible to transform from Geodetic WSG-84 Coordinates to ECEF coordinates using the  Algorithm specified in \ref{alg:ecef}.
+
+
+\begin{algorithm}[H]
+\caption{Geodetic to ECEF Coordinates }
+\label{alg:ecef}
+  \hspace*{\algorithmicindent} \textbf{Input:} Latitude and Longitude ($lat$, $lon$) in WSG-84 degrees\\
+  \hspace*{4em} Altitude ($h$) in meters\\
+  \hspace*{\algorithmicindent} \textbf{Output:} ECEF Coordinates in meters ($x$, $y$, $z$)
+  %\KwData{Testing set $x$}
+  %$\sum_{i=1}^{\infty} := 0$ \tcp*{this is a comment}
+  %\tcc{Transform latitude and longitude}
+  \begin{algorithmic}[1]
+  \STATE $N = \cfrac{EqR}{\sqrt{1 - e\_sq \cdot \sin(lat)^2}}$
+  \STATE $x = (h + N) \cdot \sin(lat) \cdot \cos(lon)$
+  \STATE $y = (h + N) \cdot \cos(lat) \cdot \sin(lon)$
+  \STATE $z = (h + (1 - e\_sq) \cdot N) \cdot \sin(lat)$
+  \STATE return $x$, $y$, $z$
+    \end{algorithmic}
+\end{algorithm}
+
+Finally, by exploiting the previous algorithm, it is possible to transform the Current Geodetic Coordinates into Local Coordinates by using some Reference Geodetic Coordinates and the following Algorithm \ref{alg:local}.
+
+\begin{algorithm}[H]
+\caption{Geodetic to Local using Current and Reference Coordinates}
+\label{alg:local}
+    \hspace*{\algorithmicindent} \textbf{Input:} Current Latitude and Longitude ($latC$, $lonC$)\\
+        \hspace*{5em} in WSG-84 degrees\\
+    \hspace*{4em} Current Altitude ($hC$) in meters\\
+    \hspace*{4em} Reference Latitude and Longitude ($latR$, $lonR$)\\
+        \hspace*{5em} in WSG-84 degrees\\
+    \hspace*{4em} Reference Altitude ($hR$) in meters \\
+    \hspace*{\algorithmicindent} \textbf{Output:} Local Coordinates in meters ($\Delta x$, $\Delta y$, $\Delta z$)
+  \begin{algorithmic}[1]
+    \STATE $xC$, $yC$, $zC$ = Geodetic to ECEF Coordinates ($latC$, $lonC$, $hC$)
+    \STATE $xR$, $yR$, $zR$ = Geodetic to ECEF Coordinates ($latR$, $lonR$, $hR$)
+    \STATE $xD = xC - xR$
+    \STATE $yD = yC - yR$
+    \STATE $zD = zC - zR$
+    \STATE $\Delta x = -~\sin(lonR)~\cdot~xD~+~\cos(latR)~\cdot~yD$
+    \STATE $\Delta y = -~\cos(lonR)~\cdot~\sin(latR)~\cdot~xD~-~\sin(latR)~\cdot~\sin(lonR)~\cdot~yD~+ \hspace*{3em} \cos(latR)~\cdot~zD$
+    \STATE $\Delta z = \cos(latR)~\cdot~\cos(lonR)~\cdot~xD~+~\cos(latR)~\cdot~\sin(lonR)~\cdot~yD~+  \hspace*{3em} \sin(latR)~\cdot~zD$
+    \STATE return $\Delta x$, $\Delta y$, $\Delta z$
+    \end{algorithmic}
+
+\end{algorithm}
+
+In order to get the mean using the first measurements before the first command to move the automower, those values are stored in $\mu_{lat}$ and $\mu_{long}$.
+
+The formula used to obtain the distance between this mean value and the current value of the gps measurements is defined below.
+
+\begin{align}
+\mathbf{x}_{GPS_t} & = \text{geodetic2enu}( latC - latR)\\
+\mathbf{y}_{GPS_t} & = \text{geodetic2enu}( longC - lonR)
+\end{align}
+
+Then the $\theta$
+
+
+\begin{equation}
+z_{\boldsymbol \theta_{GPS_t}} = \arctan(\mathbf{y}_{GPS_{t-1}} - \mathbf{y}_{GPS_t}, \mathbf{x}_{GPS_{t-1}} - \mathbf{x}_{GPS_t} )
+\end{equation}
+
+In this section we shall assume that wrapping operation
+amounts to enforcing the angular variable to be in the [$-\pi$, $\pi$]
+interval, and we designate this operation as follows
+\begin{equation}
+w_{\pi}(x) = mod(x + \pi, 2\pi) - \pi
+\end{equation}
+
+Note that when computing the difference between two angular
+variables, the wrapping effect of the circle should be taken into
+account, e.g., the difference between 178° and -178° should
+evaluate to 4°. This is achieved by the function $w_{\pi}(x)$ when the difference
+is given as the argument, i.e., difference between two angles
+x and y is computed as $w_{\pi}(x-y)$, as defined in\cite{markovic_wrapping_2017}.
+
+$$
+\boldsymbol \theta_{GPS_t} = \boldsymbol \theta_{t} + w_{\pi}(z_{\boldsymbol \theta_{GPS_t}} - \boldsymbol \theta_{t})
+$$
+
+Measurements vector with uncertainty vector
+\begin{align}
+\mathbf{Z}
+=
+\begin{bmatrix}
+\mathbf{x}_{GPS_t} \\
+\mathbf{y}_{GPS_t} \\
+\boldsymbol \theta_{GPS_t} \\
+\end{bmatrix}^T
+& \quad
+\mathbf{R}
+=
+\begin{bmatrix}
+\omega_{\mathbf{x}_{GPS}} \\
+\omega_{\mathbf{y}_{GPS}} \\
+\omega_{\boldsymbol \theta_{GPS}} \\
+\end{bmatrix}^T
+\end{align}
+where $ \omega_{\mathbf{x}_{GPS}} = \omega_{\mathbf{y}_{GPS}} = \text{HDOP} = \sqrt{\sigma_x^2 + \sigma_y^2}$ and
+$ \omega_{\boldsymbol \theta_{GPS}} = \pi/8 $ , experimentally derived.
+
+Measurement Matrix
+\begin{equation}
+H
+=
+\begin{bmatrix}
+1 & 0 & 0 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 & 0 & 0 \\
+\end{bmatrix}
+\end{equation}
+
+Measurement Jacobian Matrix
+\begin{equation}
+J_H
+=
+\begin{bmatrix}
+1 & 0 & 0 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 & 0 & 0 \\
+\end{bmatrix}
+\end{equation}
+
+
+
+\subsubsection{IMU}
+
+\noindent
+Measurements vector, as obtained by IMU, with uncertainty vector
+\begin{align}
+\mathbf{Z}
+=
+\begin{bmatrix}
+\boldsymbol \omega_{IMU_t} \\
+\mathbf{a}_{IMU_t} \\
+\end{bmatrix}^T
+& \quad
+\mathbf{R}
+=
+\begin{bmatrix}
+\eta_{\boldsymbol \omega_{IMU}} \\
+\eta_{\mathbf{a}_{IMU}} \\
+\end{bmatrix}^T
+\end{align}
+where $ \omega_{\dot{\boldsymbol \theta}_{IMU}} = 1$ and
+$ \omega_{\mathbf{a}_{IMU}} = 4 $ , experimentally derived.
+
+
+Measurement Matrix
+\begin{equation}
+H
+=
+\begin{bmatrix}
+0 & 0 & 0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 0 & 0 & 1 \\
+\end{bmatrix}
+\end{equation}
+
+Measurement Jacobian Matrix
+\begin{equation}
+J_H
+=
+\begin{bmatrix}
+0 & 0 & 0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 0 & 0 & 1 \\
+\end{bmatrix}
+\end{equation}
+
+\subsubsection{Visual Odometry}
+\noindent Using the \gls{RTABMAP} package\footnote{\url{http://introlab.github.io/rtabmap/}}\cite{6094602} \cite{labbe_rtab-map_2019}, more specifically the \gls{ROS} version 0.20.9 for \gls{ROS} Noetic.
+
+Odometry velocities merged, as the drift may still be an issue.
+
+Measurements vector, as obtained by the \gls{RTABMAP} package in \gls{ROS}.
+Moreover, it also provides its own uncertainty vector error based on the uncertainty of the estimation over the images.
+
+Measurements vector with uncertainty vector
+\begin{align}
+\mathbf{Z}
+=
+\begin{bmatrix}
+\mathbf{v}_{Vis_t} \\
+\boldsymbol \omega_{Vis_t}
+\end{bmatrix}^T
+& \quad
+\mathbf{R}
+=
+\begin{bmatrix}
+\eta_{\mathbf{v}_{Vis}} \\
+\eta_{\boldsymbol \omega_{Vis}}
+\end{bmatrix}^T
+\end{align}
+where $ \omega_{\mathbf{x}_{Vis}} = \omega_{\mathbf{y}_{Vis}} = 1$ and
+$ \omega_{\boldsymbol \theta_{Vis}} = \pi/180 $ , experimentally derived.
+
+
+Measurement Matrix
+\begin{equation}
+H
+=
+\begin{bmatrix}
+0 & 0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 0 & 1 & 0
+\end{bmatrix}
+\end{equation}
+
+Measurement Jacobian Matrix
+\begin{equation}
+J_H
+=
+\begin{bmatrix}
+0 & 0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 0 & 1 & 0
+\end{bmatrix}
+\end{equation}
+
+
+
+\subsection{Batch \gls{EKF} Correction}
+
+\noindent
+Gather all measurements and then use those combined measures for one single correction step.
+
+
+Use of thread locks to avoid issues related to out of sequence measurements.
+
+Joseph Form Covariance update
+(More time consuming) - Low improvements still relevant to be applied.
+
+\com{
+    \lstset{extendedchars=true}
+    \begin{lstlisting}[language={Python}, caption={Batch EKF}, label=lst:programmes]
+    #  Start node
+    #  Subscribe to topics
+    #  Update
+    #  Get measures
+    #  Correct
+    #  Sleep to ensure frame rateS
+
+
+
+    \end{lstlisting}
+}
+
+
+\section{Mapping Configuration}
+\label{sec:mapConf}
+
+\noindent The occupancy grid is defined using \gls{ROS}. It is composed by a grid of cells of dimension \SI{150}{m}~x~\SI{150}{m}, with the center positioned in the middle of this square at position (\SI{75}{m}~,~\SI{75}{m}), and with a resolution of \SI{0.1}{m}. In this way, it will be possible to manage an area of \SI{5000}{m^2} whichever the configuration of the lawn.
+
+\subsection{Virtual Boundary}
+\noindent
+The external boundaries are defined as $-1$ values, and so if the automower finds itself close to or directly on a cell with a value of $-1$, it will change its orientation and continue on his tasks.
+The rest of the cells are initialised with value $50$, meaning that the initial assumption is that the environment is uncertain and that there might be obstacles present within it.
+
+At the first run of the automower, the estimated trajectory derived by the EKF will be used to set the corresponding boundary, i.e. by setting the cells it directly travelled through to $-1$.
+
+After this guided procedure, the automower will have an estimate of its environment configuration and a virtual boundary to delimit its operations.
+
+\subsection{Map Update}
+\noindent
+After this phase of boundary definition, the \gls{ALM} is left free to roam on that area.
+Even if it is defined with cells containing values of $0$, it might still present unexpected objects and those are identified through the collision sensor.
+
+The value of each cell then contains the probability that an object is present in that position, with those values being updated through an average of its previous occupancy probability and the eventuality of collision events detected by the \gls{ALM}.
+
+Each grid cell of the occupancy grid map contains different values of the probabilities that rely on the sonar range information. The probability for occupied grid cell should be equal to (0.98) for the maximum self-belief for various robotics task [3,4,5]. But the probability for the occupied grid cell varied as the range information from sonar varies corresponding to the grid cell under consideration [3].
+
+Mathematical analysis for the investigation of the importance of probabilistic model in occupancy grid mapping is considered that is based on Bayesian technique. Bayesian theorem is an efficient technique to fuse the information of two occupancy grid map on the basis of probabilistic model as shown below.
+
+To do this, conditional independence is assumed between grid cells.
+
+
+The equation to update the cells is based on the Bayes Theorem.
+As defined in \cite{joubert2012adaptive} and \cite{singh_sonar_2019}, then the equation to update it is shown below:
+\begin{equation}
+    P_{i,j}^{t} = \cfrac{P_{i,j}^{t-1} \cdot P_{env}}{P_{i,j}^{t-1} \cdot P_{env} + (1-P_{i,j}^{t-1}) \cdot (1-P_{env})}
+\end{equation}
+, where $P_{i,j}^{t}$ is the final value of cell $i,j$, $P_{i,j}^{t-1}$ is the previous value of the same cell, and $P_{env}$ is the collision event value.
+
+This update equation has the important advantage that it is associative and commutative, enabling to incorporate measurements in any order.
+
+\section{Evaluation Framework}
+\com{
+\todo[inline]{This should also show that you are aware of the social and ethical concerns that might be relevant to your data collection method.)}
+}
+
+\label{sec:testing}
+
+\noindent Multiple tests are made.
+The teleoperation script available is used to control the mobile robot in velocity.
+The measures obtained by an experiments are stored in \gls{ROS} bags which can be used later on to test the filter multiple times with the same experiment.
+
+Different configurations that are going to be tested provide different observabilty performance for the AEKF filter.
+observability
+
+
+
+Finally, to evaluate if the objectives have been fulfilled and the results can be evaluated as valuable, the following steps are required:
+\begin{itemize}
+	\item The quantitative measures need to be tested in a real use case experiment, as specified in the research questions.
+	\item The data, acquired during these testing phases, will be used and analysed to check if the set of objectives have been reached.
+	\item A statistical analysis over multiple experimental tests will provide more reliable results to be presented in the final report.
+\end{itemize}
+
+
+To gather data used to test and analyse the performance of the system, multiple outdoor tests have been carried on.
+Some tests have been made to define the calibration of the sensors against a ground truth identified using measure tape.
+Some other tests have been made to ensure that the system is behaving accurately while steering.
+Some tests have been made to check that the collision events are estimated with an certain degree of precision.
+
+During these tests the rosbag utils provided by ROS has been exploited. Through this service it is possible to store every message sent to the topics, and they can be reused in the future to tune the algorithms.
+In this way, the real measurements gathered during outdoor testing can be re evaluated through the play of said messages and using a simulated parameter to reset the clock of ROS framework.
+
+
+
+\subsection{Ground Truth Generation}
+\label{sec:gt}
+
+
+\noindent The ground truth is constructed manually by checking the actual path travelled by the robot with the usage of a meter. Setting the experiment and having the robot to follow that path manually, commanding it using the given teleoperation script.
+
+
+
+\subsection{Simulation design}
+\label{sec:simDesign}
+
+\noindent Simulations will provide an overview of the sensor fusion should behave.
+
+It will use the measures obtained by the Ground Truth.
+As a real measure is obtained by a sensors, a simulated measure is generated from the ground truth using a Gaussian white noise to satisfy the Kalman assumptions.
+
+These simulated measures are used by the Kalman filter to offer its estimate.
+
+
+\subsection{Experimental design}
+\label{sec:experimentalDesign}
+
+\noindent Real Test configuration and environment in outdoor settings.
+
+Test on real measurements gathered in different conditions of terrain, slope, and conditions.
+Multiple tests have been repeated to measure the measurement's value noise of each sensors.
+
+
+
+\subsection{Data Analysis Technique}
+
+\noindent To compare the performances of different configurations, different experiments have been run.
+The different performance offered by different configuration is provided comparing the measures of the desired aspects with the frequency of the \gls{EKF}, i.e. at each step of the Sensor Fusion process the estimates of the pose are compared with the Ground Truth.
+
+
+
+\subsection{Evaluation Metric}
+
+\noindent \gls{RMSE} is used to compute the performance at each step.
+It uses the whole history of errors and then provides its value.
+\begin{equation}
+    RMSE_j = \sqrt{ \frac{1}{N}\sum_{i=1}^{N} (GroundX_j^{(i)}~-~CheckX_j^{(i)})^2}
+\end{equation}
+where $j$ indicates the value of the state that is evaluated, $i$ indicates the step to be evaluated, $N$ is the number of comparisons based on the steps computed, $GroundX_j^{(i)}$ is the ground truth value at that step, $CheckX_j^{(i)}$ is the value to be compared for performance evaluation.
+
+\com{
+	\subsection{Validity Method}
+	\todo[inline]{How will you know if your results are valid?}
+	\noindent The method is valid if the simulation filtering provide values close to the ground truth, showing that if the assumptions are validated then the system behaves as best estimator.
+
+
+	\subsection{Validity of data}
+
+	\subsection{Reliability of method}
+	\todo[inline]{How will you know if your results are reliable?}
+	\noindent The results are valid if they shows that the filter has been trained with some parameters, and using the same parameters it is possible to run different experiments as well with reliable results.
+
+	The parameters found during training of the filter are then tested in another experiment to ensure that the performances are indifferent from the environment.
+
+
+	\subsection{Reliability of data}
+}
