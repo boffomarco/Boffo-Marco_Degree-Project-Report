@@ -1,15 +1,6 @@
 \chapter{Conclusions}
 \label{ch:conclusion}
 
-DRAFT
-
-\noindent
-This project managed to fuse the measurements of multiple and heterogeneous sensors.
-It has been demonstrated how the implementation of this sensor fusion technique exploited a subset of sensors to achieve more accurate localisation estimates.
-Moreover, the mapping feature has been achieved by setting virtual boudaries through initial runs and then updating its knowledge using collision sensor events.
-
-\section{Discussions}
-\label{sec:discussion}
 \com{
 \todo[inline]{Describe the conclusions (reflect on the whole introduction given in Chapter 1).}
 
@@ -21,34 +12,12 @@ Moreover, the mapping feature has been achieved by setting virtual boudaries thr
 	If you had it to do again, what would you have done differently?\\
 }
 
+DRAFT
 
-\noindent After this master thesis, two related topics have been investigated.
-The findings are discussed below.
-
-
-\subsection{Localisation}
 \noindent
-Using a sensor fusion approach, such as \gls{AEKF}, it is possible to reach fast and robust localisation estimates.
-
-Not all the sensors behaved as expected and the best configuration has not been achieved using all the sensors available as expected.
-
-\subsection{Mapping}
-\noindent
-With the improved localisation, it is possible to limit the mowing area of the \gls{ALM} using a virtual boundary.
-
-Using collision sensors and accounting for the robot pose uncertainty it is possible to provide a better understanding of the robot environment.
-
-
-\section{Limitations}
-\label{sec:limitations}
-\com{
-\todo[inline]{What did you find that limited your
-  efforts? What are the limitations of your results?}
-}
-\noindent As the system has been tested experimentally on the field, the conditions to run it outside were needed.
-This limited the available amount of time to do outdoor testing in a relevant matter, especially given the raining days.
-
-Being the system an hardware implementation, different aspects needed to be tested before running the tests, removing time to more advanced tuning of the implementation.
+This project managed to fuse the measurements of multiple and heterogeneous sensors.
+It has been demonstrated how the implementation of this sensor fusion technique exploited a subset of sensors to achieve more accurate localisation estimates.
+Moreover, the mapping feature has been achieved by setting virtual boudaries through initial runs and then updating its knowledge using collision sensor events.
 
 \section{Future works}
 \label{sec:futureWork}
@@ -107,7 +76,7 @@ Regarding the avoidance of the objects for the unexpected detection of objects, 
 }
 \label{sec:reflections}
 
-\noindent This project will address the following ethics and sustainability issues:
+\noindent This project will address the following issues, including ethics and sustainability:
 \begin{itemize}
     \item Waste reduction: keeping the localisation module included in the automower will remove the need to install additional infrastructure which could then be susceptible to deterioration.
     \item Bees preservation: Thanks to a more accurate control of the lawn with a given map, it will be possible to dynamically update it and preserve a part of the lawn to allow bees to prosper, without intervening on the boundary wire.

@@ -44,33 +44,19 @@ On the field of robotics, their support is relevant when tasks are repetitive an
 In the specific case of mobile robotics, autonomous navigation is required and those systems can achieve it using knowledge of their pose and surroundings.
 
 The pose of a mobile robot can be estimated using sensors which provide measurements of their environment.
-Multiple types of sensors are available, with difference in frequency, phenomenon captured, and reliability.
+Multiple types of sensors are available, which differ in frequency, phenomenon captured, and reliability.
 Heterogeneous sensors provide measurements which need to be properly fused together to improve the individual knowledge that they provide.
 
 The awareness and the precision related to the position in the working environment changes with respect to each application.
 The first autonomous mobile robots available to the consumers were the indoor cleaning robots, where simple collision detection is enough to wander in the indoor environment.
 A more recent consumer application of such robots is the \gls{ALM}, which works in the more complicated outdoor setting.
 
-This master thesis investigates how to improve the performance of an \gls{ALM} providing localisation and mapping features using a set of heterogeneous sensor directly mounted on it.
-It will focus on the implementation and analysis of a module based on the fusion of the measurements provided by different configurations of those sensors to remove the need of relying on external infrastructure.
-%An overview of the best settings for a precise localisation is provided
-%Different configurations of sensors and techniques to fuse their measurements are investigated to provide an overview of the best setting to improve the localisation performance.
-Finally, their configurations are investigated through multiple experiments, and drawbacks and improvements of each sensor are analysed.
-
-
-\section{Background}
-\label{sec:background}
-%Present the background for the area. Set the context for your project – so that your reader can understand both your project and this thesis. (Give detailed background information in Chapter 2 - together with related work.)
-%Sometimes it is useful to insert a system diagram here so that the reader knows what are the different elements and their relationship to each other.
-%This also introduces the names/terms/… that you are going to use throughout your thesis (be consistent). This figure will also help you later delimit what you are going to do and what others have done or will do.
-
-
-\noindent \glspl{ALM} mow the lawn using a random walk coverage approach~\cite{karol_ardic_conditional_2016}, i.e. they move in a random direction until they detect a specific underground wire or until they collide with an object.
+\glspl{ALM} mow the lawn using a random walk coverage approach~\cite{karol_ardic_conditional_2016}, i.e. they move in a random direction until they detect a specific underground wire or until they collide with an object.
 They will then rotate towards another direction and keep on going with this behavior.
 To do so, they rely in a minimal set of sensors to achieve their goals in dynamic outdoor environments.
 
 Boundary wires are laid underground to provide the outer limits of the lawn working area, and some guide wires are used to aid the mobile robot with more complex tasks that the random behaviour will not be able to address, such as the autonomous return to the charging base and the navigation through narrow passages.
-These wires have a proprietary electrical current signal passing through and the mobile robot is able to detect it using three different magnetometer sensors, one positioned in the center front and the other two placed on each side.
+These wires transmit a proprietary electrical current signal passing through and the mobile robot is able to detect it using three different magnetometer sensors, one positioned in the center front and the other two placed on each side.
 Through the analysis of the magnetic field direction and pulses, the lawn mower is able to understand if the wire defines a boundary or if it provides a guide to go towards another area of the lawn or back to the charging base.
 However, these external wires require regular maintenance which could be avoided with a more sophisticated model.
 
@@ -90,6 +76,17 @@ They do not have a model of their world, and they do not need to update it in ca
 They are flexible and adaptive as they rely on the infrastructure manually installed for them~\cite{wahde2012introduction},  which however requires additional installation and maintenance.
 
 
+\com{
+\section{Background}
+\label{sec:background}
+%Present the background for the area. Set the context for your project – so that your reader can understand both your project and this thesis. (Give detailed background information in Chapter 2 - together with related work.)
+%Sometimes it is useful to insert a system diagram here so that the reader knows what are the different elements and their relationship to each other.
+%This also introduces the names/terms/… that you are going to use throughout your thesis (be consistent). This figure will also help you later delimit what you are going to do and what others have done or will do.
+}
+
+\noindent 
+
+
 \section{Problem}
 \com{
 Longer problem statement\\
@@ -97,7 +94,8 @@ If possible, end this section with a question as a problem statement.
 }
 
 \noindent
-The current method of autonomously mowing the lawn is not effective, since it is based on an external infrastructure, which require maintenance, to perform a reactive behaviour based on a random walk coverage algorithm~\cite{karol_ardic_conditional_2016}, which cannot guarantee a complete coverage of the area.
+The current method of autonomously mowing the lawn is not effective, since it is based on an external infrastructure to perform a reactive behaviour based on a random walk coverage algorithm~\cite{karol_ardic_conditional_2016}.
+The problems that arise from this setting are multiple, as the external components require maintenance and the current algorithm cannot guarantee a complete deterministic coverage of the area.
 %Random planning cannot guarantee a complete coverage, whereas, many deterministic techniques are not solely eligible for unstructured outdoor environments, since they highly suffer from wheel slippage or numerical drift. Besides, complete coverage techniques either demands high computational power or expensive sensor hardware.
 This configuration for the \glspl{ALM} was given by constraints related to the low computational power available in the past.
 Moreover, the recent progresses in the performance of embedded devices and sensors have made the navigation model of \glspl{ALM} obsolete, and as those components have also lowered their cost, their implementation is now feasible even for this consumer products.
@@ -125,48 +123,12 @@ Finally, the fused combination of given control commands and the whole set of se
 %Since there are just few available devices able to mow the lawn without installing additional and external devices on the lawn, this work will investigate how it can be done using a set of sensors built in the \gls{ALM} directly and removing the need for external infrastructure. This work will provide valuable insights about this heterogeneous sensor fusion.
 
 
+Autonomously mowing the lawn will help saving time and avoid human intervention as much as possible.
+The steps needed to improve current systems are related to a dynamic management of the boundary of the lawn, eliminating the need for a boundary wire with its related installation and maintenance.
 
-\section{Related Works}
-
-\noindent
-The improvement of a robotic lawn mower is a recent research topic. It has emerged thanks to a set of research outcomes which have provided tools to increase the possible features that a \gls{ALM} can achieve.
-Previous development of such mobile robots from scratch can be found in multiple reports.
-They provide a complete analysis of all the components and a comprehensive view about the features to be provided on an \gls{ALM}.
-The complete development of a fully featured mobile robot for golf course mowing, as part of a yearly robotics course, is detailed in~\cite{noauthor_groundsbot_nodate}.
-A recent master thesis about the development robotic lawn mower with Visual SLAM and terrain classifier is described in~\cite{lukas_robotic_2020}.
-A bachelor thesis regarding the prototyping of a mower using a camera and GPS in available in~ \cite{andersson_smart_2018}.
-Both of these works did not manage to deliver on the desired outcomes. This is given mostly by the lack of time considering they had to also build the infrastructure of the mower.
-
-Different approaches for localisation on a similar \gls{HRP} are described in~\cite{oden_localization_2017} using \gls{GPSRTK} external infrastrucTure and in~\cite{lensund_local_2018} using \gls{UWB} sensors on the mower.
-In these cases however, there is the requirement for external devices to localise the \gls{ALM} and this aspect is not part of the scope of this thesis.
-
-
-\subsection{Competitor Analysis}
-
-\noindent As this master thesis has been developed under the programme of EIT Digital\footnote{\url{https://masterschool.eitdigital.eu/}}, an analysis of the competitor will be performed to highlight the current state of the art at an industrial level for \glspl{ALM} which require no boundary wire installation, understanding their current implementations and evaluating possible improvements.
-
-Toadi\footnote{\url{https://www.toadi.com/}} is a startup company based in Belgium which offers as only product an \gls{ALM} of the same name. It employs a single visual sensor system to provide the localisation features. It can mow an area of \SI{4800}{\meter\squared}.
-Its installation is performed though a track and follow approach to determine the boundaries of the lawn, it has been in testing phase and it is available to the public from May 2021.
-
-The LUNA platform from Inertial Systems\footnote{\url{https://inertialsense.com/autonomy/}} employs all the sensors listed above to provide a localisation and navigation module, which has been used for \glspl{ALM}. This platform was developed to enable engineers to directly embed autonomous capability into existing equipment avoiding the development of a localisation module, as it is detailed in this thesis.
-
-Kingdom Technologies\footnote{\url{https://www.kingdom.garden/}} provide an \gls{ALM} at a monthly fee to commercial clients.
-It employs sensor fusion techniques to merge several different sensors' measures to improve the positioning of the robot on a lawn that could reach an area of \SI{7500}{\meter\squared}.
-
-Ambrogio L60 Elite S+\footnote{\url{https://www.ambrogiorobot.com/en/models/view/l60-elite-s}} requires no installation for areas up to \SI{400}{\meter\squared}.
-It employs a grass sensor to detect the presence of grass under itself and it uses a specific robotic joint to recognise any holes or empty spaces. With these sensors it is able to navigate around a defined lawn using a reactive approach, but without the need for the boundary wire.
-
-Different approaches which do not require the boundary wire installation but which still need some external infrastructures are the following.
-
-Husvarna 550 EPOS\footnote{\url{https://www.husqvarna.com/us/products/robotic-lawn-mowers/models/automower-550-epos/}} is a new \gls{ALM} available for commercial customers which employs a \gls{GPSRTK} sensor to cover areas of \SI{5000}{\meter\squared}. It needs an external and expensive receiver to correct the \gls{GNSS} estimates of the robot and improve its localisation performance to just a few centimeters error.
-
-iRobot Terra t7\footnote{\url{https://www.irobot.co.uk/Terra}} is the \gls{ALM}
-It relies on wireless navigation beacons installed on the garden to triangulate the position of the mower using their signals. However, the implementation of such technology has concerned the \gls{NRAO}, as the original intended frequency they used were disturbing the measurements of that organisation, and they had to change their beacons using \gls{UWB} signal technology.
-
-The currently developed \glspl{ALM} are still far from being mature and available to all customers.
-For this reason, an analysis of the best configuration of sensors to improve on the localisation aspects without the need for an external installation is provided, as improved localisation performance of autonomous mobile robots are required.
-
-Numerous related studies and implementations have been developed in similar topics to improve localisation features, and the analysis of an optimal configuration of sensors which require no external installations is still relevant to the best of the found knowledge.
+The knowledge about position and orientation of the mobile robot, with respect to a map, enables for the application of more deliberative architectures~\cite{genesereth_logical_1987}.
+With this architecture, the pose with respect to a map will allow the \gls{ALM} to make independent decisions and to plan its path to cover the lawn in a shorter amount of time, leaving a better pattern, avoiding unexpected objects, and saving energy and resources.
+%The term `deliberative agent' seems to have derived from Genesereth's use of the term `deliberate agent' to mean a specific type of symbolic architecture [Genesereth and Nilsson, 1987].) We define a deliberative agent or agent architecture to be one that contains an explicitly represented, symbolic model of the world, and in which decisions (for example about what actions to perform) are made via logical (or at least pseudo-logical) reasoning, based on pattern matching and symbolic manipulation. ~\cite{genesereth_logical_1987}
 
 
 \section{Research Goals}
@@ -188,12 +150,12 @@ This has been divided into the following three sub-goals:
 In addition to presenting the goal(s), you might also state what the deliverables and results of the project are.
 }
 
-\noindent Autonomously mowing the lawn will help saving time and avoid human intervention as much as possible.
-The steps needed to improve current systems are related to a dynamic management of the boundary of the lawn, eliminating the need for a boundary wire and its related installation and maintenance.
-
-The knowledge about position and orientation of the mobile robot, with respect to a map, enables for the application of more deliberative architectures~\cite{genesereth_logical_1987}.
-With this architecture, the pose with respect to a map will allow the \gls{ALM} to make independent decisions and to plan its path to cover the lawn in a shorter amount of time, leaving a better pattern, avoiding unexpected objects, and saving energy and resources.
-%The term `deliberative agent' seems to have derived from Genesereth's use of the term `deliberate agent' to mean a specific type of symbolic architecture [Genesereth and Nilsson, 1987].) We define a deliberative agent or agent architecture to be one that contains an explicitly represented, symbolic model of the world, and in which decisions (for example about what actions to perform) are made via logical (or at least pseudo-logical) reasoning, based on pattern matching and symbolic manipulation. ~\cite{genesereth_logical_1987}
+\noindent
+This master thesis investigates how to improve the performance of an \gls{ALM} providing localisation and mapping features using a set of heterogeneous sensor directly mounted on it.
+It will focus on the implementation and analysis of a module based on the fusion of the measurements provided by different configurations of those sensors to remove the need of relying on external infrastructure.
+%An overview of the best settings for a precise localisation is provided
+%Different configurations of sensors and techniques to fuse their measurements are investigated to provide an overview of the best setting to improve the localisation performance.
+Finally, their configurations are investigated through multiple experiments, and drawbacks and improvements of each sensor are analysed.
 
 The goal of this thesis is to provide an overview on how to develop a precise localisation module for an \gls{ALM}.
 An analysis about different configurations of sensors and about how to fuse their measures using sensor fusion filters is presented.
@@ -231,7 +193,7 @@ In this section you should present your philosophical assumption(s), research me
 }
 
 \noindent
-The research methodology\cite{RESEARCHMETHOD} will follow a quantitative approach: acquiring measurements and using them to validate or not the formulated research questions through quantitative analysis.
+The research methodology~\cite{RESEARCHMETHOD} will follow a quantitative approach: acquiring measurements and using them to validate or not the formulated research questions through quantitative analysis.
 The assumptions will follow an objective and realistic paradigm where the final results will be evinced quantifying measures of the observations and gaining a better knowledge of the environment.
 The research method adopted will be of experimental nature to understand the cause and effect of the obtained measurements, improving where possible, and of descriptive nature to highlight the characteristics of the obtained system.
 A deductive approach will be used to test the theories and draw conclusions about the hypotheses described in the research questions.
@@ -239,25 +201,8 @@ The research strategy adopted will be based on data collection through multiple 
 Statistical analysis will be used to test the quality of the obtained results.
 In particular, in this degree project, I will apply and discuss the validity, reliability, replicability, and ethics of those results.
 
-RISE AB, in collaboration with Husqvarna AB, is interested in the research and development of a refined approach to improve the performance of the \gls{ALM}, thus allowing for the development of more features.
-The system will be built upon the \Gls{HRP}~\cite{HRP}, a \Gls{ROS} enabled Husqvarna Automower 450X with additional sensors assembled upon it, as shown in Figure \ref{fig:HardwareSetup}.
-It has been improved by a former thesis student~\cite{HRPTianze} and it is now equipped with additional two \Glspl{IMU}, two \Gls{GNSS} signal receivers, and a \Gls{RGBD} camera.
-
-\begin{figure}[!ht]
-	\begin{center}
-		\includegraphics[width=1.0\textwidth]{Images/1-Introduction/projectTheme.pdf}
-		\caption{
-			\gls{ALM} Model with focus on additional sensors:\\
-		    \glspl{IMU} [yellow], \gls{GNSS} receivers [cyan], and Camera [green]
-	\centering }
-		\label{fig:HardwareSetup}
-	\end{center}
-\end{figure}
-
-
 The following tasks are required to achieve the above mentioned objectives.
-At first, an analysis of available platform is performed to gain a more comprehensive understanding of the current \gls{HRP} implementation.
-The documentation of the \gls{HRP}~\cite{HRP} and by the previous student~\cite{HRPTianze} are going to be carefully comprehended before focusing on the study of the related state-of-the-art.
+Literature study is the first step.
 The next step is related to the improvement of the available localisation module performance, starting from the refinement of the sensor's drivers.
 The most relevant sensor fusion technique identified is implemented to merge heterogeneous sensors' measurements.%, improving the accuracy of the localisation performance.
 Afterwards, different configurations of sensors are tested and a phase of tuning their attributes to reach more reliable and valid results is done.
@@ -298,31 +243,30 @@ The knowledge of the elements inside the obtained map is then improved using col
 			\draw[-latex] (block0) edge (block1);
 			\draw[-latex] (block1) edge (block2);
 			\draw[-latex] (block2) edge (block3);
-
-
 		\end{tikzpicture}
 	\caption[Caption]{Main tasks of the project:~\\
 	Improvement[green], new development[blue], and future development[red].\centering}
 	\end{center}
-	\label{fig:tasks}
+	\label{fig:Maintasks}
 \end{figure}
 
-\subsection{Scope}
+
 \com{
+\subsection{Scope}
 Describe the boundary/limits of your thesis project and what you are explicitly not going to do. This will help you bound your efforts – as you have clearly defined what is out of the scope of this thesis project. Explain the delimitations. These are all the things that could affect the study if they were examined and included in the degree project.
+\noindent
 }
 
-\noindent
 Since such \glspl{ALM} are consumer products, some constraints will be taken into account, such as the configuration complexity and the sensors' cost analysis.
 Some aspects regarding this degree project are described here:
 \begin{itemize}
     \item The operation area is projected into a \Gls{2D} environment.
     \item The usage of an embedded device, such as a \gls{RPi}, limits the computational power of the module. Thus, the performance might not be as good as if a more powerful device would be used. %In this project, this aspect of optimization of the limited resources available on an embedded system will not be investigate.
-    \item A complete \gls{SLAM} algorithm might be too computationally heavy to work with in a dynamic outdoor environment.
+    \item A complete \gls{SLAM} algorithm is too computationally expensive to perform well in real-time with considering a dynamic outdoor environment.
     Instead, an easier approach is to split the two different phases.
-    The localisation aspect will be achieved with a sensor fusion approach and the mapping happens after localisation using collision events to update the knowledge of the predefined map.%receiving directly a predefined map layout configuration of the environment with a given starting point of the \gls{ALM} should ease the process of  within it.
+    The localisation aspect will be achieved with a sensor fusion approach and the mapping happens after localisation, using collision events to update the knowledge of the predefined map.%receiving directly a predefined map layout configuration of the environment with a given starting point of the \gls{ALM} should ease the process of  within it.
     \item Relying on a camera in outdoor settings means that the weather conditions and time of mowing can affect the results.
-    As such, the testing will be performed in similar configurations if possible, with an attitude towards limiting such a characteristic.
+    As such, the testing will be performed in similar configurations, and, if possible, with an attitude towards limiting such a characteristic.
     \item A Range Finder Sensor was not considered as most of the outdoor environment will be sparse or empty.
     Thus, the sensor would not be able to provide valuable improvement to justify the expensive choice.
     Moreover, such a sensor requires a relevant amount of computational power to be run.
@@ -335,8 +279,8 @@ Some others instead are part of the future works, discussed at the end of this t
 \section{Structure of the thesis}
 \noindent In the following chapters the topics of this thesis are discussed as follows.
 
-Chapter~\ref{ch:introduction}, Introduction, presents briefly the background, the problem, and how it will be solved.
-The chapter also presents an overview about competitors' approaches regarding improvements of \gls{ALM} performance.
+%Chapter~\ref{ch:introduction}, Introduction, presents briefly the background, the problem, and how it will be solved.
+%The chapter also presents an overview about competitors' approaches regarding improvements of \gls{ALM} performance.
 
 Chapter~\ref{ch:background}, Background, presents relevant information about mobile robots, localisation, and mapping.
 Some theoretical related works are presented to describe the state-of-the-art.
@@ -348,10 +292,13 @@ Moreover, the methodologies and experiments configurations to achieve the resear
 Chapter~\ref{ch:whatYouDid}, Implementation, presents the system implementation adopted to test the system.
 It also motivates and elaborates on the implementation of the hardware and software required to run the system.
 
-Chapter~\ref{ch:resultsAndAnalysis}, Results, reveals and analyses the quantitative results, obtained both via simulations and experiments, which address the research questions
+Chapter~\ref{ch:results}, Experiments and Results, defines the experiments developed to address the research questions.
+Moreover, the quantitative results obtained from them are shown to highlight the desired aspects.
 
-Chapter~\ref{ch:conclusion}, Conclusions, interprets and explains the final results, wrapping up the thesis.
-Discussions about the findings, their limitations, and how to improve further are provided.
+Chapter~\ref{ch:discussion}, Discussions, explains and interprets the final results.
+The findings and their limitations are elaborated on.
+
+Chapter~\ref{ch:conclusion}, Conclusions, wraps up the thesis and  how to improve further are provided.
 Finally, some reflections related to this thesis are presented.
 
 

@@ -19,17 +19,18 @@ the degree project and give valid reasons for rejecting the work/research.
 }
 
 
-\noindent This chapter presents relevant background research that is needed to understand the current state of the art about mobile robotics, the localisation field, and the navigation aspects.
+\noindent This chapter presents relevant background research that is needed to understand the current state of the art about mobile robotics, the localisation field, and mapping aspects.
 
-The specific coordinate frame of the wheeled mobile robot adopted for this project, with its kinematics and constraints, are described to showcase how the robotic lawn mower will be localised, controlled, and constrained.
+The specific coordinate frame of the wheeled mobile robot adopted for this project, with its kinematics and constraints, are described to present how the robotic lawn mower will be localised, controlled, and constrained.
 
-Afterwards the focus will be on the localisation topic, starting from an analysis of sensors both already available on the \gls{ALM} and also those useful for positioning and which require no additional infrastructure installation.
+Afterwards, the focus will be on the localisation topic, starting from an analysis of sensors both already available on the \gls{ALM} and also those useful for positioning.
+The focus is about sensors which require no additional infrastructure installation.
 Additionally, techniques used to fuse their measurements will be described, shown, and analysed to highlight which technique is the most relevant for this project.
 
 Furthermore, a brief analysis of mapping aspects is presented.
-Different mapping algorithms are available, but only the most relevant approach for this thesis is discussed.
+Different mapping algorithms are available and only the most relevant approach for this thesis is discussed.
 
-Finally, related works are briefly described to highlight their contributions, and a summary of the lessons learned from the literature study is presented.
+Finally, theoretical related works are briefly described to highlight their contributions, and a summary of the lessons learned from the literature study is presented.
 
 
 \section{Mobile Robots}
@@ -149,34 +150,32 @@ Non-holonomic constraints do not allow for integration of the differential equat
 This forces the position and orientation to be estimated using integration of wheels velocities rather than their position displacements.
 However, with a sufficient sampling rate, an integrable approach can be used to estimate its pose, but the usage of incremental displacements provided by integration of wheels' velocity measurements will inevitably accumulate errors over time.
 
-
+\com{
 \section{Localisation}
-
-
 \noindent As this is the main topic of this project, an extensive analysis of this field will be performed.
 Understanding the current state-of-the-art of localisation and its possible improvement is required.
 
 Firstly, the available sensors that could be installed directly on the mobile robot, that do not require additional installation of infrastructures, and that can be used to improve localisation are described below.
 
 Afterwards, different techniques available to fuse their heterogeneous measurements are described in their performances.
+}
 
-
-\subsection{Sensors}
+\section{Sensors}
 
 
 
 \noindent For a robot to localise itself, it needs to perceive its surroundings and to do so it relies on its sensors' measurements.
-These sensors perceive and interpret different recorded phenomena based on their characteristics, and they can be divided in three main different types:
-\begin{itemize}
-    \item Interoceptive sensors focus on internal data measured directly by the mobile robot. They output engineering quantities which are used to estimate how the system is behaving internally, e.g. wheel encoders;
-    \item Proprioceptive sensors measure robotic interaction with environment. They provide a value of how the movements of the mobile robot are perceived with respect to the outside, e.g. accelerometers, or gyroscopes;
-    \item Exteroceptive sensors provide measures related directly to their perception of the external environment. The information they measure are related to phenomena happening at the environments around the mobile robot, e.g. magnetometers, \glspl{GNSS}, or cameras.
-\end{itemize}
+These sensors perceive and interpret different recorded phenomena based on their characteristics, and they can be divided in three main different types.
+\textit{Interoceptive sensors} focus on internal data measured directly by the mobile robot. They output engineering quantities which are used to estimate how the system is behaving internally, e.g. wheel encoders.
+\textit{Proprioceptive sensors} measure robotic interaction with environment. They provide a value of how the movements of the mobile robot are perceived with respect to the outside, e.g. accelerometers, or gyroscopes.
+\textit{Exteroceptive sensors} provide measures related directly to their perception of the external environment. The information they measure are related to phenomena happening at the environments around the mobile robot, e.g. magnetometers, \glspl{GNSS}, or cameras.
 
 As they measure different aspects, they perform differently.
 They provide advantages and disadvantages which can be combined in an intelligent manner to exploit their capabilities and limit their inaccuracies.
 
-\subsubsection{Wheel encoders}
+The available sensors that could be installed directly on the mobile robot, that do not require additional installation of infrastructures, and that can be used to improve localisation are described below.
+
+\subsection{Wheel Encoder}
 
 \noindent This interoceptive sensor detects the number of revolutions of the wheels, and they can be used to estimate their velocity~\cite{encoder}. An example of the optical wheel encoder is given in figure \ref{fig:encoder}.
 \begin{figure}[!ht]
@@ -191,15 +190,15 @@ This sensor relies on a rotary encoding disk attached to the wheel axis on the e
 Rotary encoders can be of different kinds based on which phenomenon they observe: mechanical, optical, or magnetic.
 Incremental encoders estimate the relative rotation of the wheels by detecting the number of pulses, defined by step signals A and B in Figure \ref{fig:encoder}, within certain time period using the internal clock of the embedded computer.
 
-Wheel encoders are often chosen for \gls{DR} because of their fast measurement rate and their inexpensiveness.
+Wheel encoders are often chosen for \gls{DR}, i.e. the estimation of the pose using previous estimate and velocity, because of their fast measurement rate and their inexpensiveness.
 Related to the field of sensor fusion, these are key aspects to consider, as their employment is effective if combined with other sensors. They will be able to provide fast accurate velocity measures which could be used to compute a short-term accurate \gls{DR}.
 
-The estimate derived from the wheel encoders is called \gls{DR} and it is subjects to errors and their accumulation.
+The estimate derived from the wheel encoders is called \gls{WO} and it is subjects to errors and their accumulation.
 Some non-systematic errors related to these sensors are the miscalculations caused by slippage, uneven terrain, and other environmental issues which include wheels temperature and pressure of their tires.
 In order to improve its \gls{DR} estimates, other sensors' measurements can be combined with its velocity estimates to get rid of the integration error accumulation on its position calculations.
 
 
-\subsubsection{Inertial Measurement Unit}
+\subsection{Inertial Measurement Unit}
 
 \noindent An \gls{IMU} is an inertial sensor which is used to detect multiple phenomena and which measurements are relative to the inertial frame of platform they are attached to.
 They have both proprioceptive and exteroceptive characteristics as they contain both accelerometers, gyroscopes, and magnetometers.
@@ -209,13 +208,13 @@ Recent \glspl{IMU} are developed on \glspl{MEMS} which are inexpensive and provi
   \begin{center}
     \includegraphics[width=0.5\textwidth]{Images/2-Background/IMU-2021-04-23 14-13-19.png}
   \end{center}
-  \caption{Structure of accelerometers and gyroscopes of an \Gls{IMU}. \cite{inertial}}
+  \caption{Structure of accelerometers and gyroscopes of an \Gls{IMU}~\cite{inertial}.}
   \label{fig:imu}
 \end{figure}
 
 Accelerometers measure the linear accelerations, gyroscopes output the rotational velocities, and magnetometers detect the earth magnetic field.
 Knowing these measures, the position and orientation can be estimated by integrating those signal over time with a \gls{DR} approach.
-Their measurement are prone to deterministic errors, such as repeatable terms and temperature induced variations, and to stochastic errors as switch-on to switch-on variations, and in-run variations \cite{magnusson_improving_2012}.
+Their measurement are prone to deterministic errors, such as repeatable terms and temperature induced variations, and to stochastic errors as switch-on to switch-on variations, and in-run variations~\cite{magnusson_improving_2012}.
 Deterministic errors can be compensated for through prediction and calibration, while stochastic ones are more difficult to model because of their noise and randomness.
 Accelerometers and Gyroscopes are sensors that need no external support, and they are not conditioned by external conditions or disturbances as they measure proprioceptive characteristics.
 Magnetometers instead might be conditioned by external disturbances as the magnetic field can be disturbed by multiple external factors, as any electronic device has a magnetic influence.
@@ -223,7 +222,7 @@ Magnetometers instead might be conditioned by external disturbances as the magne
 They provide accurate results over a short time span, but the integration of noisy results implies an accumulation of these errors over time. This phenomenon then leads to a diverging drift effect, if not corrected by other sensor measurements.
 
 
-\subsubsection{Global Navigation Satellite System}
+\subsection{Global Navigation Satellite System}
 
 \noindent \glspl{GNSS} are exteroceptive systems based on signals received from satellites orbiting earth.
 A \gls{GNSS} receiver uses trilateration to estimate its position on the globe using time of flight of the signals sent by some satellites.
@@ -250,7 +249,7 @@ With a higher number of perceived satellite signals, the receiver is able to use
 The sampling rate of \gls{GNSS} receivers is usually around one estimate per second, thus it is generally too slow to estimate the position for vehicles.
 
 
-\subsubsection{Camera}
+\subsection{Camera}
 
 \noindent A camera sensor is an exteroceptive sensors, usually composed of lenses and light sensors, which gathers the \gls{RGB} information from the environment.
 Recent camera models are able to estimate stereopsis data, i.e. depth measurements can be estimated.
@@ -263,13 +262,13 @@ By knowing their relative pose changes and the configuration of the camera, it i
 The performances of this technique relies on the identification of landmarks, the more visible and variant landmarks are detectable, the more the pose estimation will be accurate.
 Those features are computed using different descriptors, e.g. \gls{SIFT}, \gls{SURF}, and \gls{ORB}.
 The matching phase is guided by an initial estimate of the camera movement which projects previously found features to search just along that projection.
-The landmarks are matched after passing a consistency test and those displacements are triangulated to estimate the camera pose through a bundle adjustment step\cite{robustFusion}, as shown in figure \ref{fig:camera}.
+The landmarks are matched after passing a consistency test and those displacements are triangulated to estimate the camera pose through a bundle adjustment step~\cite{robustFusion}, as shown in figure \ref{fig:camera}.
 
 \begin{figure}[!ht]
   \begin{center}
     \includegraphics[width=0.65\textwidth]{Images/2-Background/VO.pdf}
   \end{center}
-  \caption{Motion estimation via \gls{F2F} methodology \cite{camera}\cite{cameraa}.}
+  \caption{Motion estimation via \gls{F2F} methodology~\cite{camera}~\cite{cameraa}.}
   \label{fig:camera}
 \end{figure}
 
@@ -283,31 +282,32 @@ Given the still relatively low frequency of the \gls{VO}, high linear and angula
 
 
 
-\subsection{Sensor Fusion}
+\section{Sensor Fusion}
 
 \noindent
 In the field of localisation for mobile robots, sensor fusion is employed to combine redundant and complementary measurements from heterogeneous sensors to gain a more precise understanding of the pose in the environment.
 An issued related to the sensor fusion problem is the determination of the best configuration to combine the measurements of multiple different sensors.
-The objective of sensor fusion is to merge the knowledge acquired by these sensors to improve the position estimate with a more accurate solution with respect to any of the individual data sources trying to mitigate their drawbacks and to maintain their best provided features\cite{mitchell_multi-sensor_2007}.
+The objective of sensor fusion is to merge the knowledge acquired by these sensors to improve the position estimate with a more accurate solution with respect to any of the individual data sources trying to mitigate their drawbacks and to maintain their best provided features~\cite{mitchell_multi-sensor_2007}.
 
-Sensor fusion could be characterised based on their competitive, complementary, and cooperative approaches\cite{1199023}.
+Sensor fusion could be characterised based on their competitive, complementary, and cooperative approaches~\cite{1199023}.
 Competitive fusion happens when the same attribute is estimated by different sensors to increase the system's robustness.
 Complementary fusion is related to the merging the observations of different phenomena to describe the complete system's behaviour.
 Cooperative fusion combines measures from different sources to provide information that will not be obtained by a single sensor.
 
-Sensor fusion is related to independent measures and it can be differentiate into multiple categories: sensors, attributes, domains, and time\cite{weckenmann_multisensor_2009}.
+Sensor fusion is related to independent measures and it can be differentiate into multiple categories: sensors, attributes, domains, and time~\cite{weckenmann_multisensor_2009}.
 The fusion across different sensors involves merging the same measured phenomenon from different devices to increase the robustness of the measured data, in a competitive approach.
 Fusion among different attributes is focused on sensors which estimates different but connected measures which might be related by kinematics or dynamics aspects, improving their precision in a complementary way.
 Different domains are fused when sensors measure the same attribute with a different range or frame, improving their performances when one of these sensors reaches its limits, through a cooperative procedure.
 Sensor fusion across time merges measure arrived at different times with increasing reliability to increase the evolution of the estimates.
 
-The most common approach to sensor fusion is through the usage of statistical methods, where the uncertainties of the sensors are described by probabilistic models\cite{gustafsson_statistical_2010}.
+The most common approach to sensor fusion is through the usage of statistical methods, where the uncertainties of the sensors are described by probabilistic models~\cite{gustafsson_statistical_2010}.
 This section will describe the basics of some statistical filters used for sensor fusion purposes.
-Firstly, the \gls{KF} will be detailed as it is the most basic among them, followed by an analysis of its non-linear correspondent, the \gls{EKF}. A brief description of other linearisations, such as the \gls{UKF}, and other approaches, such as \gls{PF}, are provided in this section even if they will not be used in this thesis, simply to provide a more comprehensive overview of sensor fusion techniques.
+The \gls{KF} will be detailed as it is the most basic among them, followed by an analysis of its non-linear correspondent, the \gls{EKF}. 
+These different techniques available to fuse their heterogeneous measurements are described in their performances.
 
-\subsubsection{Kalman Filter}
+\subsection{Kalman Filter}
 
-\noindent The \gls{KF} was first developed by R.E. Kalman and published in \cite{kalman} as a Bayesian estimator used in linear Gaussian systems.
+\noindent The \gls{KF} was first developed by R.E. Kalman and published in~\cite{kalman} as a Bayesian estimator used in linear Gaussian systems.
 The usage of \gls{KF} is ideal for real time, embedded, and sensor fusion systems as it can estimate dynamic systems disturbed by sensor noise with high performances.
 It does not require to store in memory the history of all the previous states and they are computationally efficient.
 
@@ -421,11 +421,11 @@ The measurement noise covariance $R$ is composed by the variances of its compone
 If the state and measurement noises change over time, their matrices $Q$ and $R$ needs to be updated as the filter runs, as it is their relative ratio which determines how the Kalman gain $K$ is defined to improve the estimates. In this case, the \gls{KF} is defined as adaptive~\cite{adaptive}~\cite{1099422}.
 
 
-An numerical evaluation improvement over the standard \gls{KF} is directly given by changing the state covariance correction step using the Joseph’s form\cite{schmidt_analysis_2010}, defined by:
+An numerical evaluation improvement over the standard \gls{KF} is directly given by changing the state covariance correction step using the Joseph’s form~\cite{schmidt_analysis_2010}, defined by:
 \begin{equation}
     P_{t+1} = (I - K \cdot H) \cdot \hat{P}_{t+1} \cdot (I - K \cdot H)^T + K \cdot R \cdot K^T
 \end{equation}
-As the standard state covariance correction is composed by subtraction, which can result in a loss in symmetry and positive-definiteness due to rounding errors in a finite word length computer, the Joseph’s form state covariance correction maintains positive and non-zero eigenvalues in $P_t$ through a more computationally demanding equation\cite{BarShalom2001EstimationWA}.
+As the standard state covariance correction is composed by subtraction, which can result in a loss in symmetry and positive-definiteness due to rounding errors in a finite word length computer, the Joseph’s form state covariance correction maintains positive and non-zero eigenvalues in $P_t$ through a more computationally demanding equation~\cite{BarShalom2001EstimationWA}.
 
 For the filter to be considered an optimal estimator, it needs to exploit the properties of the Gaussian uncertainties, meaning that the disturbances in both the process and measurements need to be composed by Gaussian white noise.
 Moreover, the prediction and correction phases are formulated with the assumptions that the state $\mathbf{x}_t$ is markovian, i.e. that is evolution depends solely on its previous value, and that the measurement $\mathbf{z}_{t+1}$ only depends on the state $\mathbf{x}_{t+1}$, and not on previous measurements.
@@ -433,7 +433,7 @@ When these assumptions are validated, the \gls{KF} is proven to be the best line
 However, it can be used with reasonable results even if the assumptions are not true, i.e. when the noise is not Gaussian and the system is non linear, but in those cases other filters will perform better and must be preferred, such as the ones described below.
 In any case, as the \gls{KF} needs multiple iterations to stabilise, if its state is observable, the performance of the algorithm should not account for the first steps.
 
-\subsubsection{Extended Kalman Filter}
+\subsection{Extended Kalman Filter}
 
 \noindent The \gls{EKF} is an extension of the \gls{KF} used to estimate non linear systems, where equations \eqref{eq:pred-state} and \eqref{eq:pred-measure} are defined respectively as follows:
 \begin{align}
@@ -445,8 +445,8 @@ In any case, as the \gls{KF} needs multiple iterations to stabilise, if its stat
 
 The problem related to non linear system is given by the fact that even though its inputs are Gaussian random variables, its outputs are not and therefore they could not be used for the propagation of the estimates and covariances with the \gls{KF} equations.
 
-The \gls{EKF} deals with the non linearity of the system by propagating the estimates through a linearisation of those functions around the previous estimates of the system using the Taylor's expansion\cite{thrun_probabilistic_2005}.
-The obtained first order derivatives, defined as Jacobian matrices, are used as approximation for the linear transformation of the system\cite{1386886}.
+The \gls{EKF} deals with the non linearity of the system by propagating the estimates through a linearisation of those functions around the previous estimates of the system using the Taylor's expansion~\cite{thrun_probabilistic_2005}.
+The obtained first order derivatives, defined as Jacobian matrices, are used as approximation for the linear transformation of the system~\cite{1386886}.
 \newcommand{\partialat}[2]{\frac{\partial {#1}}{\partial {#2}}}
 The corresponding matrices will be substituted in the previously defined equations for the \gls{KF}, as:
 \begin{align}
@@ -458,30 +458,6 @@ The linear approximation of the \gls{EKF} is based on the first order derivative
 
 An improvement on the performance of the \gls{EKF}, regarding how to handle highly non-linear systems, has been defined in the \gls{IEKF}. As described in~\cite{xu_adaptive_2014}, the correction step is iterated along new estimates after every measure to achieve a more accurate estimation and a lower variance before a new prediction step.
 
-\subsubsection{Unscented Kalman Filter}
-
-\noindent The \gls{UKF} is an alternative to the \gls{KF} for estimation of highly non linear systems\cite{unscentedK}.
-Instead of using a linearisation approach, the \gls{UKF} is based on a deterministic sampling method.
-The estimates are propagated through the non linear system using sample values, called sigma points, defined by the unscented transform.
-This procedure provides two values along the mean of the estimate and symmetrically placed on its main uncertainty axes.
-Although the results are not a Gaussian random variables, their mean and standard deviation can be derived from them to maintain the \gls{KF} assumption.
-
-Its improvements in estimates and covariance accuracy are relevant over the \gls{EKF} when the functions $f$ and $h$ are highly non-linear, as it is accurate to the second order Taylor's expansion.
-Moreover, it does not need to compute Jacobians of the non linear functions of the system\cite{thrun_probabilistic_2005}.
-
-
-
-\subsubsection{Particle Filter}
-
-\noindent The \gls{PF} provides another implementation of a Bayesian filter\cite{particle}.
-It is an iterative algorithm which saves multiple potential state estimate values, known as particles.
-The probability the state estimate value in a moment in time is given by the density of particles nearby which contains similar values.
-At each iteration, a sampling phase is performed generating temporary particles using the current estimated state.
-Afterwards an importance factor is calculated using new measurements of the state and it provides a likelihood value for the next estimations.
-In the resampling phase, the proper particles are updated by using the estimates provided by one of the temporary particles with a selection based on the importance factor.
-This process is continuously iterate and the particles will eventually converge to a proper estimate over several steps.
-
-The Rao-Blackwellized \gls{PF} extends it using both particles and Gaussian random variables as state variables\cite{murphy_rao-blackwellised_2001}.
 
 \section{Mapping}
 
@@ -492,7 +468,7 @@ Moreover, maps can be defined based on their perspective: world-centric maps whe
 
 The description of a common used map which project a \gls{3D} environment into a \gls{2D} abstraction and which aids the localisation aspects is provided below.
 
-\subsection{Occupancy Grid Map}
+\subsection{Occupancy Grid}
 \noindent Occupancy grids are world-centric metric maps which are composed of occupancy probabilities cells.
 Their representation of the environment is defined by evenly spaced cells containing a random variable which describes the uncertainty of the presence of an obstacle within its coordinates~\cite{thrun_probabilistic_2005}.
 While the mobile robot moves in that map, the measurements obtained can be used to update the random variables of nearby cells using approximates posterior estimates.
@@ -505,9 +481,21 @@ Then, once a better certainty about its knowledge of the map in reached, the mob
 
 
 
-\section{Theoretical Related Works}
+\section{Related Works}
 
 \noindent
+The improvement of a robotic lawn mower is a recent research topic. It has emerged thanks to a set of research outcomes which have provided tools to increase the possible features that a \gls{ALM} can achieve.
+Previous development of such mobile robots from scratch can be found in multiple reports.
+They provide a complete analysis of all the components and a comprehensive view about the features to be provided on an \gls{ALM}.
+The complete development of a fully featured mobile robot for golf course mowing, as part of a yearly robotics course, is detailed in~\cite{noauthor_groundsbot_nodate}.
+A recent master thesis about the development robotic lawn mower with Visual SLAM and terrain classifier is described in~\cite{lukas_robotic_2020}.
+A bachelor thesis regarding the prototyping of a mower using a camera and GPS in available in~ \cite{andersson_smart_2018}.
+Both of these works did not manage to deliver on the desired outcomes. This is given mostly by the lack of time considering they had to also build the infrastructure of the mower.
+
+Different approaches for localisation on a \gls{HRP} have been developed: in~\cite{oden_localization_2017}, using \gls{GPSRTK} external infrastructure, and in~\cite{lensund_local_2018}, using \gls{UWB} sensors on the mower.
+In these cases however, there is the requirement for external devices to localise the \gls{ALM} and this aspect is not part of the scope of this thesis.
+
+
 A review about techniques for localisation and mapping for autonomous systems is provided in~\cite{9065135}, where the focus is about the definition of sensors' performance and the description of different map features.
 
 Extensive analyses of the techniques used by autonomous robots that have to deal with real-world sensor data and mapping using their measurements are provided in~\cite{thrun_probabilistic_2005},~\cite{gustafsson_statistical_2010} and~\cite{mitchell2007multi}, which are well-cited references for estimation tasks.
@@ -540,7 +528,7 @@ In~\cite{chenavier_position_1992}, an adaptive approach to sensor fusion using \
 
 
 Comparisons about different configurations of sensor fusion approaches are defined in the following references.
-In~\cite{amador_robot_2019}, a comparison about the fusion of \gls{WO}, \gls{GNSS}, and \gls{IMU} using \gls{EKF} and \gls{UKF} is presented. It highlights how the \gls{EKF} provides more accurate and frequent results than the \gls{UKF}.
+In~\cite{amador_robot_2019}, a comparison about the fusion of \gls{WO}, \gls{GNSS}, and \gls{IMU} using \gls{EKF} and \gls{UKF}, described in \ref{sec:ukf}, is presented. It highlights how the \gls{EKF} provides more accurate and faster results than the \gls{UKF}.
 In~\cite{7373480}, an \gls{EKF} is adopted to improve the localisation of a mobile robot using different configurations with a wheel encoder, a magnetic compass, one \gls{GNSS} receiver, and one \gls{IMU}. The most accurate results have been obtained by the approach fusing all their measures.
 In~\cite{8696103}, different configurations of sensors including \gls{WO}, \gls{GNSS} receiver and \gls{IMU} are fused with an \gls{EKF} and analysed. The most accurate results have been obtained fusing all the sensors' measurements.
 Multiple \glspl{KF} are used in~\cite{liu2016stereo} to merge \gls{VO} and \gls{IMU}, and to discuss the related improvements provided by different configurations.
@@ -552,8 +540,8 @@ To improve the non-linearity performances, an implementation of the \gls{IEKF} w
 As the focus of this thesis is related to the usage of occupancy grids, their presence in the state-of-the-art implementation is analysed.
 
 In \cite{joubert2012adaptive}, an algorithm to consider measurements from a range sensor to update the cells of an occupancy grid using Bayes Theorem is presented, specifying that it has been derived and improved from~\cite{12145} and\cite{thrun_probabilistic_2005}.
-A similar approach has been presented in \cite{singh_sonar_2019}, where the sensor of choice to detect the environment is the sonar sensor. 
-In these two approaches, two separate occupancy grids are used to check for emptyness and occupancy, with a final process of using the most probable cells to provide the map.
+A similar approach has been presented in \cite{singh_sonar_2019}, where the sensor of choice to detect the environment is the sonar sensor.
+In these two approaches, two separate occupancy grids are used to describe the emptyness and occupancy aspects of the environment. A final process is then performed to merge their knowledge by using the most probable cells to provide the map.
 
 %An algorithm based on Occupancy Grids for terrain mapping using sensor information is available at~\cite{Saranya2016OccupancyGB}.
 
@@ -566,12 +554,12 @@ It is nice to have this chapter conclude with a summary. For example,you can inc
 \noindent The key lessons learned during this background analysis and description can be summarised by the following points:
 \begin{itemize}
     \item a localisation module could be built in a modular way starting from a general model and its kinematic analysis.% and the usage of that \gls{ROS}-enabled mobile platform to easily test and compare the results of different configurations of sensors;
-    \item the sensors available, which do not require an external infrastructure installations, are enough to measure enough phenomena to cover the states needed to improve the localisation aspects of a mobile robot;
+    \item the sensors available, which do not require an external infrastructure installations, are enough to measure the necessary phenomena to cover the states needed to improve the localisation aspects of a mobile robot;
     \item statistical sensor fusion techniques enables for the merging of measure from different and heterogeneous sensors with performances which are robust and fast enough to be implemented in an embedded device;
     \item the \gls{AEKF} provides good estimates and it can be tuned using changing the noises related to the measures, as the localisation scope requires;
-    \item occupancy grids provide a \gls{2D} abstractions of the environment which can account both the presence of obstacles within it and the definitions of its boundaries;
+    \item occupancy grids provide a \gls{2D} abstractions of the environment which can account both the definitions of its boundaries and the presence of obstacles within it;
     \item the usage of collision events to update the knowledge of the cells in the occupancy grid is possible using the Bayes Theorem.
-    \item numerous related studies and implementations have been developed in similar topics to improve localisation features.%, and the analysis of an optimal configuration of sensors which require no external installations is still relevant to the best of the found knowledge.
+    \item numerous related studies and implementations have been developed in similar topics to improve localisation and mapping features.%, and the analysis of an optimal configuration of sensors which require no external installations is still relevant to the best of the found knowledge.
 \end{itemize}
 
 

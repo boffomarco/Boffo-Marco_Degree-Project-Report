@@ -3,14 +3,108 @@
 
 DRAFT
 
-\noindent
-The localisation performances are defined by the sensor fusion approach, \gls{AEKF}.%, to exploit the measurements of the available sensors.
+\noindent The structure to provide localisation and mapping features is provided in Figure \ref{fig:structure}.
 
-The mapping approach is then defined using an Occupancy Grid relying on the more accurate pose estimation.
-The collision sensor is used to update the knowledge of the robot's environment.
+The localisation system is defined by the sensor fusion approach to exploit the measurements available in a way that limits the different drawbacks of the related sensors.
+The filter that will be used is a \gls{AEKF}, as it is a robust and adaptable.
 
-Finally, the evaluation configuration is defined, showing how the system developed is performing and how its performance are going to be evaluated.
+The mapping approach is defined from the more accurate pose estimation and using the collision sensor to update the knowledge of the environment.
+An occupancy grid is produced as result this phase.
 
+\begin{figure}[!ht]
+	\begin{center}
+		\begin{tikzpicture}[font=\small,thick]
+			\node[draw, text centered, fill=white!30,
+			align=center,
+			minimum width=3cm,
+			minimum height=1cm,
+			] (block0) { Localisation };
+
+			\node[draw, text centered, fill=white!30,rounded corners,
+			above=2cm of block0,align=center,
+			minimum width=2.5cm,
+			minimum height=1cm,
+			] (block01) { Kinematic\\Model };
+
+			\node[draw,text centered,fill=white!30,rounded corners,
+			left=of block0, align=center,
+			minimum width=2cm,
+			minimum height=1cm,
+			] (block1) { \glspl{GNSS} };
+
+			\node[draw,text centered,fill=white!30,rounded corners,
+			above=0.5cm of block1, align=center,
+			minimum width=2cm,
+			minimum height=1cm,
+			] (block2) { \gls{WO} };
+
+			\node[draw,text centered,fill=white!30,rounded corners,
+			left=0.5cm of block01,
+			align=center,
+			minimum width=2cm,
+			minimum height=1cm,
+			] (block3) { Control };
+
+			\node[draw,text centered,fill=white!30,rounded corners,
+			below=0.5cm of block1,
+			align=center,
+			minimum width=2cm,
+			minimum height=1cm,
+			] (block4) { \glspl{IMU} };
+
+			\node[draw,text centered,fill=white!30,rounded corners,
+			below=0.5cm of block4,
+			align=center,
+			minimum width=2cm,
+			minimum height=1cm,
+			] (block5) { \gls{VO} };
+
+			\node[draw,text centered,fill=white!30,rounded corners,
+			right=of block0,
+			align=center,
+			minimum width=2cm,
+			minimum height=1cm,
+			] (block6) { \textbf{Pose Estimation} };
+
+
+			\node[draw,text centered,fill=white!30,
+			right=of block6,
+			align=center,
+			minimum width=2cm,
+			minimum height=1cm,
+			] (block8) { Mapping };
+
+			\node[draw,text centered,fill=white!30,rounded corners,
+			above=of block8,
+			align=center,
+			minimum width=2cm,
+			minimum height=1cm,
+			] (block7) { Collision };
+
+			\node[draw,text centered,fill=white!30,rounded corners,
+			below=of block8,
+			align=center,
+			minimum width=2cm,
+			minimum height=1cm,
+			] (block9) { \textbf{Occupancy Grid} };
+
+			% Arrows
+			\draw[-latex] (block1) edge (block0);% node [above, fill=white] {Label Text};
+			\draw[-latex] (block01) edge (block0);
+			\draw[-latex] (block2) edge (block0);
+			\draw[-latex] (block3) edge (block0);
+			\draw[-latex] (block4) edge (block0);
+			\draw[-latex] (block5) edge (block0);
+			\draw[-latex] (block0) edge (block6);
+			\draw[-latex] (block6) edge (block8);
+			\draw[-latex] (block7) edge (block8);
+			\draw[-latex] (block8) edge (block9);
+
+		\end{tikzpicture}
+		\caption[Caption]{Structure of the Solution\centering}
+		\label{fig:structure}
+	\end{center}
+\end{figure}
 
 
 \section{Localisation Configuration}
@@ -27,10 +121,10 @@ Its implementation is hereby defined, starting from the Prediction phase, its me
 %\end{figure}
 
 
-\subsection{ \gls{EKF} Prediction}
+\subsection{Prediction Model}
 
 \noindent
-As we are working in 2D, the state variables needed are the following:
+As we are working in \gls{2D}, the state variables needed are the following:
 $$
   \label{eq:state-transf}
 \mathbf{X}_t=
@@ -39,9 +133,8 @@ $$
 \end{bmatrix} ^T
 $$
 
-\subsubsection{Transition}
+%\subsubsection{Transition}
 
-\noindent
 \begin{equation}
 A_t
 =
@@ -56,9 +149,8 @@ A_t
 \end{equation}
 
 
-\subsubsection{Control}
+%\subsubsection{Control}
 
-\noindent
 \begin{align}
 B
 =
@@ -66,7 +158,7 @@ B
     0 & 0 \\
     0 & 0\\
     0 & 0\\
-    s_v & 0\\
+    s_\mathbf{v} & 0\\
     0 & s_{ \dot{\boldsymbol \theta}}\\
     0 & 0\\
     0 & 0
@@ -89,20 +181,19 @@ $ \text{Control}_{\mathbf{v}}$ and  $\text{Control}_{\boldsymbol \omega}$ are th
 $s_{.}$ instead is used to make the transition from command received and actual actuation more smooth by limiting the innovation given by the respective control through a scaling value $s_. = 0.5$
 
 
-\subsubsection{Noise}
+%\subsubsection{Uncertainty}
 
-\noindent
 The noise vector is defined as
 \begin{equation}
 \boldsymbol \eta
 =
 \begin{bmatrix}
-\eta_{\mathbf{x}}  &
-\eta_{\mathbf{y}} &
-\eta_{\boldsymbol \theta}  &
-\eta_{\mathbf{v}} &
-\eta_{\boldsymbol \omega} &
-\eta_{\mathbf{a}}
+\boldsymbol \eta_{\mathbf{x}}  &
+\boldsymbol \eta_{\mathbf{y}} &
+\boldsymbol \eta_{\boldsymbol \theta}  &
+\boldsymbol \eta_{\mathbf{v}} &
+\boldsymbol \eta_{\boldsymbol \omega} &
+\boldsymbol \eta_{\mathbf{a}}
 \end{bmatrix} ^T
 \end{equation}
 where $\eta_i \sim \mathcal{N}(\mu_i,\,\sigma_{ii}^{2})$ with $\mu_i = 0$, $\sigma_{ii}^2 = 0.1$, and $ i = \{ \mathbf{x} , \mathbf{y} , \boldsymbol \theta , \mathbf{v} , \boldsymbol \omega , \mathbf{a} \}$
@@ -112,6 +203,10 @@ The prediction step for the state variables is then the following
 \mathbf{X}_{p} = A \cdot \mathbf{X}_t + B \cdot \mathbf{u}_t + \boldsymbol \eta
 \end{equation}
 
+
+
+%\subsubsection{Linearisation}
+
 Since we are dealing with an Extended Kalman Filter, the Jacobian of the transition matrix must be obtained to linearise the non-linear equations with a first order taylor expansion, obtaining :
 
 \begin{equation}
@@ -119,8 +214,8 @@ J_A
 =
 \begin{bmatrix}
 
-1 & 0 & 0 & -\sin(\boldsymbol \theta_t) \cdot \Delta_t & 0 & -\sin(\boldsymbol \theta_t) \cdot  \frac{\Delta_t^2 }{2} \\
-0 & 1 & 0 & \cos(\boldsymbol \theta_t) \cdot \Delta_t & 0 & \cos(\boldsymbol \theta_t) \cdot  \frac{\Delta_t^2 }{2} \\
+1 & 0 & 0 & -\sin(\boldsymbol \theta_t) \cdot \Delta_t & 0 & -\sin(\boldsymbol \theta_t) \cdot  \cfrac{\Delta_t^2 }{2} \\
+0 & 1 & 0 & \cos(\boldsymbol \theta_t) \cdot \Delta_t & 0 & \cos(\boldsymbol \theta_t) \cdot  \cfrac{\Delta_t^2 }{2} \\
 0 & 0 & 1 & 0 & \Delta_t & 0 \\
 0 & 0 & 0 & 1 & 0 & \Delta_t \\
 0 & 0 & 0 & 0 & 1 & 0 \\
@@ -148,16 +243,14 @@ Finally the covariance matrix after prediction is:
     %P_{p} & =  \frac{P_{p} +  P_{p}^T}{2} && \text{To ensure symmetry}
 \end{align}
 
-
+\com{
 \subsection{Adaptive Measurement Models}
 \noindent Check for new measurements in background and dynamically create the components for the update step
+}
 
-
-\subsubsection{Wheel Encoder}
+\subsection{Wheel Encoder Model}
 
 \noindent
-After the derivation of $\mathbf{v}$ and $\boldsymbol \omega$ as defined in equation \eqref{eq:disp}:
-
 Through the usage of wheel encoders attached to both these wheels, an estimated velocity for them is calculated and used to determine its pose.
 This open-loop technique to determine the position and orientation is called \gls{DR}, as the new pose is estimated by using the last known pose and the new speed measurements.
 
@@ -251,7 +344,7 @@ J_H
 \end{equation}
 
 
-\subsubsection{GPS}
+\subsection{GNSS receiver Model}
 
 \noindent The measures obtained by the \gls{GNSS} receiver are transformed from WSG-84 degrees to local coordinates as specified below.
 
@@ -263,14 +356,14 @@ It is done so both for the initial coordinate and then used to check the differe
 
 From World Geodetic System: WGS 84 values
 \begin{align}
-    EqR &= 6378137 && \text{Equatorial radius (m)} \\
-    PoR &= 6356752.3142 && \text{Polar radius (m)}
+    R_E &= 6378137 && \text{Equatorial radius (\SI{}{\meter})} \\
+    R_P &= 6356752.3142 && \text{Polar radius (\SI{}{\meter})}
 \end{align}
 
 From which the following can be derived the following values necessary for the next algorithms:
 \begin{align}
-    f &= \frac{EqR - PoR}{EqR} \\
-    e\_sq &= f \cdot (2-f)
+    F_R &= \frac{R_E - R_P}{R_E} &
+    E_R &= F_R \cdot (2-F_R)
 \end{align}
 
 Using these values it is possible to transform from Geodetic WSG-84 Coordinates to ECEF coordinates using the  Algorithm specified in \ref{alg:ecef}.
@@ -286,7 +379,7 @@ Using these values it is possible to transform from Geodetic WSG-84 Coordinates 
   %$\sum_{i=1}^{\infty} := 0$ \tcp*{this is a comment}
   %\tcc{Transform latitude and longitude}
   \begin{algorithmic}[1]
-  \STATE $N = \cfrac{EqR}{\sqrt{1 - e\_sq \cdot \sin(lat)^2}}$
+  \STATE $N = \cfrac{EqR}{\sqrt{1 - E_R \cdot \sin(lat)^2}}$
   \STATE $x = (h + N) \cdot \sin(lat) \cdot \cos(lon)$
   \STATE $y = (h + N) \cdot \cos(lat) \cdot \sin(lon)$
   \STATE $z = (h + (1 - e\_sq) \cdot N) \cdot \sin(lat)$
@@ -399,7 +492,7 @@ J_H
 
 
 
-\subsubsection{IMU}
+\subsection{IMU Model}
 
 \noindent
 Measurements vector, as obtained by IMU, with uncertainty vector
@@ -442,9 +535,8 @@ J_H
 \end{bmatrix}
 \end{equation}
 
-\subsubsection{Visual Odometry}
-\noindent Using the \gls{RTABMAP} package\footnote{\url{http://introlab.github.io/rtabmap/}}\cite{6094602} \cite{labbe_rtab-map_2019}, more specifically the \gls{ROS} version 0.20.9 for \gls{ROS} Noetic.
-
+\subsection{Camera Model}
+\noindent 
 Odometry velocities merged, as the drift may still be an issue.
 
 Measurements vector, as obtained by the \gls{RTABMAP} package in \gls{ROS}.
@@ -492,7 +584,7 @@ J_H
 
 
 
-\subsection{Batch \gls{EKF} Correction}
+\subsection{Correction Model}
 
 \noindent
 Gather all measurements and then use those combined measures for one single correction step.
@@ -512,9 +604,6 @@ Joseph Form Covariance update
     #  Get measures
     #  Correct
     #  Sleep to ensure frame rateS
-
-
-
     \end{lstlisting}
 }
 
@@ -550,7 +639,7 @@ To do this, conditional independence is assumed between grid cells.
 The equation to update the cells is based on the Bayes Theorem.
 As defined in \cite{joubert2012adaptive} and \cite{singh_sonar_2019}, then the equation to update it is shown below:
 \begin{equation}
-    P_{i,j}^{t} = \cfrac{P_{i,j}^{t-1} \cdot P_{env}}{P_{i,j}^{t-1} \cdot P_{env} + (1-P_{i,j}^{t-1}) \cdot (1-P_{env})}
+    P_{i,j}^{t+1} = \cfrac{P_{i,j}^{t} \cdot P_{env}}{P_{i,j}^{t} \cdot P_{env} + (1-P_{i,j}^{t}) \cdot (1-P_{env})}
 \end{equation}
 , where $P_{i,j}^{t}$ is the final value of cell $i,j$, $P_{i,j}^{t-1}$ is the previous value of the same cell, and $P_{env}$ is the collision event value.
 
@@ -563,7 +652,10 @@ This update equation has the important advantage that it is associative and comm
 
 \label{sec:testing}
 
-\noindent Multiple tests are made.
+\noindent 
+The evaluation configuration is defined, showing how the system developed is performing and how its performance are going to be evaluated.
+
+Multiple tests are made.
 The teleoperation script available is used to control the mobile robot in velocity.
 The measures obtained by an experiments are stored in \gls{ROS} bags which can be used later on to test the filter multiple times with the same experiment.
 
@@ -593,9 +685,7 @@ In this way, the real measurements gathered during outdoor testing can be re eva
 \subsection{Ground Truth Generation}
 \label{sec:gt}
 
-
 \noindent The ground truth is constructed manually by checking the actual path travelled by the robot with the usage of a meter. Setting the experiment and having the robot to follow that path manually, commanding it using the given teleoperation script.
-
 
 
 \subsection{Simulation design}
@@ -607,15 +697,6 @@ It will use the measures obtained by the Ground Truth.
 As a real measure is obtained by a sensors, a simulated measure is generated from the ground truth using a Gaussian white noise to satisfy the Kalman assumptions.
 
 These simulated measures are used by the Kalman filter to offer its estimate.
-
-
-\subsection{Experimental design}
-\label{sec:experimentalDesign}
-
-\noindent Real Test configuration and environment in outdoor settings.
-
-Test on real measurements gathered in different conditions of terrain, slope, and conditions.
-Multiple tests have been repeated to measure the measurement's value noise of each sensors.
 
 
 
