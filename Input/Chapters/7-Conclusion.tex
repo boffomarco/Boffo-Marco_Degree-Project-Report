@@ -12,12 +12,31 @@
 	If you had it to do again, what would you have done differently?\\
 }
 
-DRAFT
-
 \noindent
 This project managed to fuse the measurements of multiple and heterogeneous sensors.
 It has been demonstrated how the implementation of this sensor fusion technique exploited a subset of sensors to achieve more accurate localisation estimates.
-Moreover, the mapping feature has been achieved by setting virtual boudaries through initial runs and then updating its knowledge using collision sensor events.
+
+The mapping feature has been achieved by setting virtual boudaries through initial runs and then updating its knowledge using collision sensor events.
+
+
+
+
+\section{Limitations}
+\noindent
+A simple measurement tape, and accurate definition of the path with strings have been used to define the ground truth used to evaluate the system.
+A more precise way to compute the Ground Truth might be useful.
+
+"""
+The limitations of rosbag record/play
+In the previous section you may have noted that the turtle's path may not have exactly mapped
+to the original keyboard input - the rough shape should have been the same, but the turtle may
+not have exactly tracked the same path. The reason for this is that the path tracked by turtlesim
+is very sensitive to small changes in timing in the system, and rosbag is limited in its ability to
+exactly duplicate the behavior of a running system in terms of when messages are recorded and
+processed by rosrecord, and when messages are produced and processed when using rosplay.
+For nodes like turtlesim, where minor timing changes in when command messages are
+processed can subtly alter behavior, the user should not expect perfectly mimicked behavior.
+"""
 
 \section{Future works}
 \label{sec:futureWork}
@@ -38,17 +57,12 @@ a problem to be solved. Solving this problem is the next thing that should be
 done. ...
 }
 
-\noindent
+\noindent The system could be expanded and improved in multiple directions. 
+
+%\subsection{Localisation}
+
 Expanding the states of the system in order to navigate in a 3D environment instead than a simple 2D environment as in this project.
 It will be possible to account for slopes in the lawn and it could be interesting to evaluate its influence in the GPS readings.
-
-
-It could be investigated a trade off between computations needed for a reliable SLAM implementation instead of an online implementation provided in this report.
-
-
-Exploit depth information from the camera to provide a faster identification of collision events, eventually providing a map of the environment based on depth information instead of collision events.
-Instead of using the collision sensors to update the map, the camera, and its depth readings,  could be used for object detection to identify and avoid the objects before collision.
-
 
 Outliers detection in case of non reliable sensors and once the covariances noises matrices have been ultimately perfected. Moreover, it can be crucial when the sensors are not behaving correctly.
 
@@ -61,10 +75,24 @@ characterizing the odometry error (e.g. wheel diameters,
 distance between the wheel).
 
 
+%\subsection{Mapping}
+
+Exploit depth information from the camera to provide a faster identification of collision events, eventually providing a map of the environment based on depth information instead of collision events.
+Instead of using the collision sensors to update the map, the camera, and its depth readings,  could be used for object detection to identify and avoid the objects before collision.
+
+It could be investigated a trade off between computations needed for a reliable SLAM implementation instead of an online implementation provided in this report.
+
+
+%\subsection{Planning}
+
+
 Path planning algorithm as in~\cite{coveragePathplanning} and \cite{machines6040046}, can be used to provide coverage features to the autonomous lawn mowers.
 A comprehensive overview about coverage is available in \cite{galceran_survey_2013}. It discusses all the available techniques and their related strengths and weaknesses.
 More specific approaches to be investigated can be found in \cite{hameed_coverage_2017} and \cite{cabreira_grid-based_2019}.
 Regarding the avoidance of the objects for the unexpected detection of objects, a techniques is define in \cite{daltorio_obstacle-edging_2010}.
+
+The last aspect of navigation program is locomotion~\cite{autonomous-yasuda}.
+
 
 
 

@@ -10,7 +10,6 @@ Does this meet the goals which you had when you started?
 }
 \label{ch:results}
 
-DRAFT
 
 \noindent
 The results obtained from the localisation and mapping feature added to the \gls{ALM} are shown.
@@ -31,7 +30,7 @@ Multiple tests have been repeated to measure the measurement's value noise of ea
 		\label{tab:eval}
 		\begin{tabular}{|c||c|c|c|c|c|c|c|}
 			\hline
-			\multirow{2}{*}{\textbf{Model}} & \multicolumn{6}{c|}{\textbf{Sensors}} & \multirow{2}{*}{\textbf{Comment}}\\
+			\multirow{2}{*}{\textbf{Model}} & \multicolumn{6}{c|}{\textbf{Sensors}} & \multirow{2}{*}{\textbf{Description}}\\
 			& \multicolumn{1}{c|}{Control} & \multicolumn{1}{c|}{\gls{WO}} & \multicolumn{1}{c|}{\gls{GNSS}}& \multicolumn{1}{c|}{\glspl{GNSS}} & \multicolumn{1}{c|}{\glspl{IMU}} & \multicolumn{1}{c|}{\gls{VO}} & \\
 			\hline
 			\hline
@@ -40,6 +39,8 @@ Multiple tests have been repeated to measure the measurement's value noise of ea
 			\centering{2} & YES & YES & YES & YES & YES & YES & Complete \\
 			\hline
 			\centering{3} & YES & YES & YES & NO & YES & YES & Reliable \\
+			\hline
+			\centering{3-1} & YES & YES & YES & NO & YES & NO & Reliable \\
 			\hline
 			\centering{4} & YES & YES & NO & NO & YES & NO & Cheap solution \\
 			\hline
@@ -72,24 +73,24 @@ These results have been evaluated using the \gls{RMSE} metric, the values obtain
 		\small
 		\begin{center}
 			\label{tab:evalSim}
-			\begin{tabular}{|c||S|S|S||S|S|S||S|S|}
+			\begin{tabular}{|c||S[table-format=-1.2(4)]|S[table-format=-1.2(1)]|S[table-format=-1.2(1)]||S|S|S||S[table-format=-1.2(1)]|}
 				\hline
-				\multirow{3}{*}{\textbf{Model}} & \multicolumn{8}{c|}{\textbf{Evaluation Criteria}} \\
-				& \multicolumn{3}{c||}{\textbf{RMSE}} & \multicolumn{3}{c||}{\textbf{Uncertainty}} & \multicolumn{2}{c|}{\textbf{Time step}}\\
-				& \multicolumn{1}{c|}{x[\SI{}{\meter}]} & \multicolumn{1}{c|}{y[\SI{}{\meter}]} & \multicolumn{1}{c||}{$\theta$[\SI{}{\radian}]} & \multicolumn{1}{c|}{x[\SI{}{\meter}]} & \multicolumn{1}{c|}{y[\SI{}{\meter}]} & \multicolumn{1}{c||}{$\theta$[\SI{}{\radian}]} & \multicolumn{1}{c|}{$\mu$[\SI{}{\milli \second}]} & \multicolumn{1}{c|}{$\sigma$[\SI{}{ms}]}\\
+				\multirow{3}{*}{\textbf{Model}} & \multicolumn{7}{c|}{\textbf{Evaluation Criteria}} \\
+				& \multicolumn{3}{c||}{\textbf{Final Offset}} & \multicolumn{3}{c||}{\textbf{RMSE}} & \multicolumn{1}{c|}{\textbf{Time step}}\\
+				& \multicolumn{1}{c|}{$\mathbf{x} \pm \sigma_\mathbf{x}$[\SI{}{\meter}]} & \multicolumn{1}{c|}{$\mathbf{y} \pm \sigma_\mathbf{y}$[\SI{}{\meter}]} & \multicolumn{1}{c||}{$\boldsymbol \theta  \pm \sigma_{\boldsymbol \theta}$[\SI{}{\radian}]} & \multicolumn{1}{c|}{x[\SI{}{\meter}]} & \multicolumn{1}{c|}{y[\SI{}{\meter}]} & \multicolumn{1}{c||}{$\theta$[\SI{}{\radian}]} & \multicolumn{1}{c|}{$\Delta_t \pm \sigma_{\boldsymbol \Delta_t}$ [\SI{}{\milli \second}]} \\
 				\hline
 				\hline
-				\centering{Sim 1} & 4.35 & 4.10 & 0.6 & 10.35 & 5.10 & 1.6 & 4.23 & 0.1 \\
+				\centering{SIM 1} & 4.35 \pm 1.25 & 4.10 \pm 0.44 & 0.6 \pm 0.04 & 10.35 & 5.10 & 1.6 & 4.23 \pm 0.1 \\
 				\hline
-				\centering{Sim 2} & 4.35 & 4.1 & 0.6 & 10.35 & 5.10 & 1.6 & 4.23 & 0.1 \\
+				\centering{SIM 2} & 40.35 \pm 11.25 & 4.1 & 0.6 & 10.35 & 5.10 & 1.6 & 4.23 \pm 0.1 \\
 				\hline
-				\centering{Sim 3} & 4.35 & 14.10 & 0.6 & 10.35 & 5.10 & 1.6 & 4.23 & 0.1 \\
+				\centering{SIM 3} & 4.35 & 14.10 & 0.6 & 10.35 & 5.10 & 1.6 & 4.23 \pm 0.1 \\
 				\hline
-				\centering{Sim 4} & 4.35 & 4.10 & 0.6 & 10.35 & 5.10 & 1.6 & 4.23 & 0.1 \\
+				\centering{SIM 4} & 4.35 & 4.10 & 0.6 & 10.35 & 5.10 & 1.6 & 4.23 \pm 0.1 \\
 				\hline
-				\centering{Sim 5} & 4.35 & 4.10 & 0.6 & 10.35 & 5.10 & 1.6 & 4.23 & 0.1 \\
+				\centering{SIM 5} & 4.35 & 4.10 & 0.6 & 10.35 & 5.10 & 1.6 & 4.23 \pm 0.1 \\
 				\hline
-				\centering{Sim 6} & 4.35 & 4.10 & 0.6 & 10.35 & 5.10 & 1.6 & 4.23 & 0.1 \\
+				\centering{SIM 6} & 4.35 & 4.10 & 0.6 & 10.35 & 5.10 & 1.6 & 4.23 \pm 0.1 \\
 				\hline
 			\end{tabular}
 			\caption{Simulated experiments results}
@@ -120,7 +121,7 @@ These results have been evaluated using the \gls{RMSE} metric, the values obtain
 			\begin{tabular}{|c||S|S|S||S|S|S||S|S|}
 				\hline
 				\multirow{3}{*}{\textbf{Model}} & \multicolumn{8}{c|}{\textbf{Evaluation}} \\
-				 & \multicolumn{3}{c||}{\textbf{RMSE}} & \multicolumn{3}{c||}{\textbf{Uncertainty}} & \multicolumn{2}{c|}{\textbf{Time step}}\\
+				 & \multicolumn{3}{c||}{\textbf{Final Offset}} & \multicolumn{3}{c||}{\textbf{RMSE}} & \multicolumn{2}{c|}{\textbf{Time step}}\\
 				 & \multicolumn{1}{c|}{x[\SI{}{\meter}]} & \multicolumn{1}{c|}{y[\SI{}{\meter}]} & \multicolumn{1}{c||}{$\theta$[\SI{}{\radian}]} & \multicolumn{1}{c|}{x[\SI{}{\meter}]} & \multicolumn{1}{c|}{y[\SI{}{\meter}]} & \multicolumn{1}{c||}{$\theta$[\SI{}{\radian}]} & \multicolumn{1}{c|}{$\mu$[\SI{}{\milli \second}]} & \multicolumn{1}{c|}{$\sigma$[\SI{}{\milli \second}]}\\
 				\hline
 				\hline
@@ -163,7 +164,7 @@ With this virtual boundary, the \gls{ALM} is able to stay within the designed ar
 \end{figure}
 
 
-\subsection{Occupancy Grid Update}
+\subsection{Occupancy Grid Boundary with Update}
 \noindent
 The virtual boundary is then set with the initial run setting of the personalised virtual boundary.
 

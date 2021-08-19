@@ -303,7 +303,7 @@ Commonly used frames are odom and base\_link. The odom frame has the origin at t
 \noindent
 Everything that has been developed during this thesis could be found in \url{https://github.com/boffomarco/hrp}
 
-The following files are the main contributions provide in this thesis.
+The following files are the main contributions provided in this thesis.
 
 \section{System Configuration}
 \noindent
@@ -351,6 +351,70 @@ OccupancyGrid.py
 plot\_histogram.py
 
 gps\_plot.py
+
+
+\section{Software Configuration}
+\noindent
+C++ and Python development to work with the ROS framework, explained in details in Appendix \ref{ch:ros}.
+
+Network establishment to communicate wirelessly between Raspberry Pi and computer.
+
+Communication through hotspot
+
+
+
+\subsection{Controller}
+\label{sec:driver_safe}
+\noindent The \gls{ALM} behaviour is defined by the launching file \texttt{automower\_hrp.launch}.
+It defines and launch the controller of the \gls{HRP}.
+
+
+
+\subsection{Velocity Control}
+\label{sec:control}
+\noindent
+The script \texttt{hrp\_teleop.lauch} as provided by the \gls{HRP} platform is used to drive the \gls{ALM} during the experiments.
+It controls the vehicle by setting its desired velocities: $\mathbf{v}v$ and $\boldsymbol \omega$.
+In this way it is possible to command the \gls{ALM} to follow a trajectory.
+
+
+\subsection{Launching the sensors}
+\noindent The measurements are obtained from the heterogeneous sensors using the following methods.
+
+
+The \glspl{IMU} sensors are started using the file \texttt{imus\_basic.launch}.
+In this file, the node defined by the \texttt{phidget\_spatial} drivers is used, each sensor will belong to its group, and its coordiante frame is defined by the installation coordinates.
+
+The additional Phidget \gls{GPS} sensors are launched by the file \texttt{imus\_basic.launch}.
+In the file, the node calls for a personalised driver that has been implemented to gather the \gls{NMEA} data directly provided by the Phidgets \gls{API}.
+The information provided by this \gls{NMEA} data structure
+
+The additional Phidget \gls{GPS} sensors are launched by the file \texttt{imus\_basic.launch}.
+In the file, the node calls for a personalised driver that has been implemented to gather the \gls{NMEA} data directly through the Phidgets \gls{API}.
+The information provided by this \gls{NMEA} data structure covers both the localisation estimate and its related accuracy, in form of \gls{HDOP}.
+
+The camera added is exploited running the file \texttt{rs\_camera.launch}.
+It is a customised launch file that has been improved starting from the camera own driver.
+As it does not provide the measurements directly, the \gls{VO} package \gls{RTABMAP} is run via a customised \texttt{rtabmap.launch} file, obtained initially from the \gls{RTABMAP} package and then tuned for the scope of this thesis.
+
+
+
+\subsection{Launching the localisation feature}
+\noindent The localisation improvements are performed by the script in \texttt{AEKF.py}.
+It performs the \gls{AEKF} elaborated in \ref{sec:locConf}.
+
+To perform in an asynchronous way, a binary lock is adopted to account when a measurement update is performed at the same time of a measurement receive.
+
+
+\subsection{Launching the mapping update}
+\noindent The mapping feature is provided by the implementation available in \texttt{Mapping.py}.
+
+The initial phase is of setting the boundaries.
+
+Then a specific message changes the
+
+The collision events are then exploited to update the knowledge of the surroundings.
+
 
 
 

@@ -1,15 +1,20 @@
 \chapter{Methods}
 \label{ch:methods}
 
-DRAFT
+\noindent In this chapter, the techniques adopted are explained from a theoretical perspective.
+The chosen methods and related models are discussed to highlight the rationale behind their use to reach and evaluate the research goals defined in Chapter \ref{ch:introduction}.
 
-\noindent The structure to provide localisation and mapping features is provided in Figure \ref{fig:structure}.
+The localisation system is defined by a sensor fusion approach to exploit the measurements available in a way that limits the different drawbacks of the sensors available.
+The sensor fusion filter that will be used is a \gls{AEKF}, as it is a robust and adaptable.
+It enables for the fast and reliable fusion of heterogeneous sensors in a way that will enable the \gls{ALM} to have a more accurate estimate of its pose.
 
-The localisation system is defined by the sensor fusion approach to exploit the measurements available in a way that limits the different drawbacks of the related sensors.
-The filter that will be used is a \gls{AEKF}, as it is a robust and adaptable.
+The mapping approach is defined starting from the results of the localisation and exploiting the collision sensor installed in the \gls{ALM}.
+Through the usage of these elements, a virtual boundary will be set and the presence of objects within it will be provided by the events fired by such a sensor.
 
-The mapping approach is defined from the more accurate pose estimation and using the collision sensor to update the knowledge of the environment.
-An occupancy grid is produced as result this phase.
+Finally, the methodology adopted to evaluate the performances of these modules is defined.
+
+The structure to provide localisation and mapping features is shown in Figure \ref{fig:structure}.
+
 
 \begin{figure}[!ht]
 	\begin{center}
@@ -106,149 +111,216 @@ An occupancy grid is produced as result this phase.
 	\end{center}
 \end{figure}
 
-
-\section{Localisation Configuration}
-\label{sec:locConf}
 \noindent
-The localisation method is based on an \gls{AEKF}.
-Its implementation is hereby defined, starting from the Prediction phase, its measurements collection, and the Correction phase.
-%\begin{figure}[!ht]
-%  \begin{center}
-%    \includegraphics[width=0.25\textwidth]{Homepage-icon.png}
-%  \end{center}
-%  \caption{Homepage icon}
-%  \label{fig:homepageicon}
-%\end{figure}
+RISE AB, in collaboration with Husqvarna AB, is interested in the research and development of a refined approach to improve the performance of the \gls{ALM}, thus allowing for the development of more features.
+The system will be built upon the \Gls{HRP}~\cite{HRP}, a \Gls{ROS} enabled Husqvarna Automower 450X with additional sensors assembled upon it, as shown in Figure \ref{fig:HardwareSetup}.
+It has been improved by a former thesis student~\cite{HRPTianze} and it is now equipped with additional two \Glspl{IMU}, two \Gls{GNSS} signal receivers, and a \Gls{RGBD} camera.
+
+\begin{figure}[!ht]
+	\begin{center}
+		\includegraphics[width=1.0\textwidth]{Images/1-Introduction/projectTheme.pdf}
+		\caption{
+			\gls{ALM} Model with focus on additional sensors:\\
+			\glspl{IMU} [yellow], \gls{GNSS} receivers [cyan], and Camera [green]
+			\centering }
+		\label{fig:HardwareSetup}
+	\end{center}
+\end{figure}
 
 
-\subsection{Prediction Model}
+The platform adopted, \gls{HRP}, has been improved starting from its configuration and sensors' drivers.
+
+
+At first, an analysis of available platform is performed to gain a more comprehensive understanding of the current \gls{HRP} implementation.
+The documentation of the \gls{HRP}~\cite{HRP} and by the previous student~\cite{HRPTianze} are going to be carefully comprehended before focusing on the study of the related state-of-the-art.
+
+
+\section{Hardware Configuration}
+\label{sec:system}
 
 \noindent
-As we are working in \gls{2D}, the state variables needed are the following:
-$$
-  \label{eq:state-transf}
-\mathbf{X}_t=
-\begin{bmatrix}
-\mathbf{x}_t & \mathbf{y}_t & \boldsymbol \theta_t & \mathbf{v}_t & \boldsymbol \omega_t & \mathbf{a}_t
-\end{bmatrix} ^T
-$$
-
-%\subsubsection{Transition}
-
-\begin{equation}
-A_t
-=
-\begin{bmatrix}
-1 & 0 & 0 & \cos(\boldsymbol \theta_t) \cdot \Delta_t & 0 & \cos(\boldsymbol \theta_t) \cdot  \cfrac{\Delta_t^2 }{2} \\
-0 & 1 & 0 & \sin(\boldsymbol \theta_t) \cdot \Delta_t & 0 & \sin(\boldsymbol \theta_t) \cdot  \cfrac{\Delta_t^2 }{2} \\
-0 & 0 & 1 & 0 & \Delta_t & 0 \\
-0 & 0 & 0 & 1 & 0 & \Delta_t \\
-0 & 0 & 0 & 0 & 1 & 0 \\
-0 & 0 & 0 & 0 & 0 & 1
-\end{bmatrix}
-\end{equation}
-
-
-%\subsubsection{Control}
-
-\begin{align}
-B
-=
-    \begin{bmatrix}
-    0 & 0 \\
-    0 & 0\\
-    0 & 0\\
-    s_\mathbf{v} & 0\\
-    0 & s_{ \dot{\boldsymbol \theta}}\\
-    0 & 0\\
-    0 & 0
-    \end{bmatrix}
-& \quad
-\mathbf{u}_t
-=
-    \begin{bmatrix}
-    \boldsymbol \Delta_{\mathbf{v}}  \\
-    \boldsymbol \Delta_{ \boldsymbol \omega} \\[0.3em]
-    \end{bmatrix}
-\end{align}
-where:
-  \begin{align}
-     \boldsymbol \Delta_{\mathbf{v}} = \text{Control}_{\mathbf{v}} - \mathbf{v}_t  \\
-    \boldsymbol \Delta_{\boldsymbol \omega} = \text{Control}_{\boldsymbol \omega} - \boldsymbol \omega_t
-  \end{align}
-$ \text{Control}_{\mathbf{v}}$ and  $\text{Control}_{\boldsymbol \omega}$ are the command sent to the robot, obtained by a specific topic.
-
-$s_{.}$ instead is used to make the transition from command received and actual actuation more smooth by limiting the innovation given by the respective control through a scaling value $s_. = 0.5$
-
-
-%\subsubsection{Uncertainty}
-
-The noise vector is defined as
-\begin{equation}
-\boldsymbol \eta
-=
-\begin{bmatrix}
-\boldsymbol \eta_{\mathbf{x}}  &
-\boldsymbol \eta_{\mathbf{y}} &
-\boldsymbol \eta_{\boldsymbol \theta}  &
-\boldsymbol \eta_{\mathbf{v}} &
-\boldsymbol \eta_{\boldsymbol \omega} &
-\boldsymbol \eta_{\mathbf{a}}
-\end{bmatrix} ^T
-\end{equation}
-where $\eta_i \sim \mathcal{N}(\mu_i,\,\sigma_{ii}^{2})$ with $\mu_i = 0$, $\sigma_{ii}^2 = 0.1$, and $ i = \{ \mathbf{x} , \mathbf{y} , \boldsymbol \theta , \mathbf{v} , \boldsymbol \omega , \mathbf{a} \}$
-
-The prediction step for the state variables is then the following
-\begin{equation}
-\mathbf{X}_{p} = A \cdot \mathbf{X}_t + B \cdot \mathbf{u}_t + \boldsymbol \eta
-\end{equation}
-
-
-
-%\subsubsection{Linearisation}
-
-Since we are dealing with an Extended Kalman Filter, the Jacobian of the transition matrix must be obtained to linearise the non-linear equations with a first order taylor expansion, obtaining :
-
-\begin{equation}
-J_A
-=
-\begin{bmatrix}
-
-1 & 0 & 0 & -\sin(\boldsymbol \theta_t) \cdot \Delta_t & 0 & -\sin(\boldsymbol \theta_t) \cdot  \cfrac{\Delta_t^2 }{2} \\
-0 & 1 & 0 & \cos(\boldsymbol \theta_t) \cdot \Delta_t & 0 & \cos(\boldsymbol \theta_t) \cdot  \cfrac{\Delta_t^2 }{2} \\
-0 & 0 & 1 & 0 & \Delta_t & 0 \\
-0 & 0 & 0 & 1 & 0 & \Delta_t \\
-0 & 0 & 0 & 0 & 1 & 0 \\
-0 & 0 & 0 & 0 & 0 & 1
-\end{bmatrix}
-\end{equation}
-
-\begin{equation}
-Q
-=
-\begin{bmatrix}
-\sigma_{\mathbf{xx}}^2 & 0 & 0 & 0 & 0 & 0 \\
-0 & \sigma_{\mathbf{yy}}^2 & 0 & 0 & 0 & 0 \\
-0 & 0 & \sigma_{\mathbf{\boldsymbol \theta \boldsymbol \theta}}^2 & 0 & 0 & 0 \\
-0 & 0 & 0 & \sigma_{\mathbf{vv}}^2 & 0 & 0 \\
-0 & 0 & 0 & 0 & \sigma_{{\boldsymbol \omega}{\boldsymbol \omega}}^2 & 0 \\
-0 & 0 & 0 & 0 & 0 & \sigma_{\mathbf{aa}}^2 \\
-\end{bmatrix}
-\end{equation}
-
-Finally the covariance matrix after prediction is:
-
-\begin{align}
-    P_{p} & = J_A \cdot P_t \cdot J_A^T + Q && \\
-    %P_{p} & =  \frac{P_{p} +  P_{p}^T}{2} && \text{To ensure symmetry}
-\end{align}
+\gls{HRP} that holds the sensors and the raspberry pi, also proving the measurements of the wheel encoders and of the embedded GPS receiver.
+Computer to guide the \gls{ALM} and make him move according to the desired path, also at the end the \gls{ALM} was free to run its random path and use the algorithm implemented to stay inside the boundaries.
 
 \com{
-\subsection{Adaptive Measurement Models}
-\noindent Check for new measurements in background and dynamically create the components for the update step
+	\begin{figure}[!ht]
+		\begin{center}
+			\includegraphics[width=0.5\textwidth]{Images/4-Done/}
+		\end{center}
+		\caption{Hardware}
+		\label{fig:hardware}
+	\end{figure}
 }
 
+
+\com{
+	\subsection{Devices}
+	\label{ssec:dev}
+	\noindent
+	Raspberry Pi 4 to guide the \gls{ALM}, to gather information about the topics of ROS, and to communicate them to the personal computer used to gather them.
+}
+
+\subsection{Raspberry Pi 4}
+\noindent
+On this device, most of the embedded devices will be attached.
+The \gls{HRP}, the \glspl{IMU}, and the camera.
+
+\begin{figure}[!ht]
+	\begin{center}
+		\begin{subfigure}[b]{.5\textwidth}
+			\begin{center}
+				\includegraphics[width=0.85\textwidth]{Images/4-Methods/RPi4.jpg}
+			\end{center}
+			\caption{Raspberry Pi 4 Model B}
+			\label{fig:rpi4Im}
+		\end{subfigure}
+		\begin{subfigure}[b]{.45\textwidth}
+			\begin{center}
+				\begin{tikzpicture}[font=\small,thick]
+					\node[draw, text centered, fill=white!30,
+					align=center,
+					minimum width=3cm,
+					minimum height=1cm,
+					] (block0) { Raspberry Pi 4};
+					
+					\node[draw,text centered,fill=white!30,rounded corners,
+					below=0.5cm of block0, align=center,
+					minimum width=2.5cm,
+					minimum height=1cm,
+					] (block1) { \gls{HRP} Automower };
+					
+					\node[above=of block0] (block) { };
+					
+					\node[draw,text centered,fill=yellow!30,rounded corners,
+					left=0.1cm of block,
+					align=center,
+					minimum width=2.5cm,
+					minimum height=1cm,
+					] (block2) { Phidget \glspl{IMU}};
+					
+					\node[draw,text centered,fill=green!30,rounded corners,
+					right=0.1cm of block,
+					align=center,
+					minimum width=2.5cm,
+					minimum height=1cm,
+					] (block3) { Camera};
+					
+					\node[below=of block1] (blockk) { };
+					
+					\node[draw,text centered,fill=white!30,rounded corners,
+					left=0.1cm of blockk,
+					align=center,
+					minimum width=2.5cm,
+					minimum height=1cm,
+					] (block4) { Wheel Encoder};
+					
+					\node[draw,text centered,fill=white!30,rounded corners,
+					right=0.1cm of blockk,
+					align=center,
+					minimum width=2.5cm,
+					minimum height=1cm,
+					] (block5) { Automower \gls{GNSS}};
+					
+					% Arrows
+					\draw[latex-] (block0) edge (block1);
+					\draw[latex-] (block0) edge (block2);
+					\draw[latex-] (block0) edge (block3);
+					\draw[latex-] (block1) edge (block4);
+					\draw[latex-] (block1) edge (block5);
+				\end{tikzpicture}
+				\caption[Caption]{Raspberry Pi 4 configuration \centering}
+			\end{center}
+			\label{fig:RPi4Conf}
+		\end{subfigure}
+		\caption{Raspberry Pi 4}
+		\label{fig:RPi4}
+	\end{center}
+\end{figure}
+
+
+\subsection{Raspberry Pi 3}
+\noindent
+On this device, running Ubuntu 20, the Phidgets GPS sensors will be attached.
+
+
+\begin{figure}[!ht]
+	\begin{subfigure}[b]{.5\textwidth}
+		\begin{center}
+			\includegraphics[width=0.5\textwidth]{Images/4-Methods/RPi3.jpg}
+		\end{center}
+		\caption{Raspberry Pi 3 Model B}
+		\label{fig:rpi3Im}
+	\end{subfigure}%
+	\begin{subfigure}[b]{.45\textwidth}
+		\begin{center}
+			\begin{tikzpicture}[font=\small,thick]
+				\node[draw, text centered, fill=white!30,
+				align=center,
+				minimum width=3cm,
+				minimum height=1cm,
+				] (block0) { Raspberry Pi 3};
+				
+				\node[draw,text centered,fill=cyan!30,rounded corners,
+				above=0.5cm of block0, align=center,
+				minimum width=2.5cm,
+				minimum height=1cm,
+				] (block1) { Phidget \glspl{GPS} };
+				% Arrows
+				\draw[latex-] (block0) edge (block1);
+			\end{tikzpicture}
+			\caption[Caption]{Raspberry Pi 3 configuration \centering}
+		\end{center}
+		\label{fig:RPi3Conf}
+	\end{subfigure}
+	\caption{Raspberry Pi 3}
+	\label{fig:RPi3}
+\end{figure}
+
+
+\section{Adaptive Sensor Models}
+\noindent Check for new measurements in background and dynamically create the components for the update step
+
 \subsection{Wheel Encoder Model}
+
+\noindent
+It is included in the motor of the wheel of the \gls{ALM}, inside the Motor Kit shown in \ref{fig:wheelenc}.
+Measure the wheel displacement and provide \gls{WO}, as explained in \ref{ch:methods}.
+
+
+The performances have been examined and are available below.
+
+\begin{figure}[!ht]
+	\begin{center}
+		\begin{subfigure}[b]{.5\textwidth}
+			\centering
+			\includegraphics[width=0.75\textwidth]{Images/4-Methods/MotorEnc.jpeg}
+			\caption{Motor Kit Automower 450X }
+			\label{fig:wheelenc}
+		\end{subfigure}%
+		\begin{subfigure}[b]{.45\textwidth}
+			\begin{center}
+				\label{tab:evalWheels}
+				\begin{tabular}{|c||S|}
+					\hline
+					\centering{\textbf{Aspect}} &  \multicolumn{1}{c|}{\textbf{Value}} \\
+					\hline
+					\hline
+					\centering{Frequency} &  \SI{200}{Hz} \\
+					\hline
+					\centering{$\boldsymbol \eta_v$} &  \SI{0.02}{\meter/\second} \\
+					\hline
+					\centering{$\boldsymbol \eta_{\omega}$} & \SI{0.02}{\radian/\second} \\
+					\hline
+				\end{tabular}
+				\caption{Sensor's performance}
+			\end{center}
+		\end{subfigure}
+		\caption{Wheel Encoder }
+		\label{fig:wheel}
+	\end{center}
+\end{figure}
+
+They are mounted in the wheel axis on both wheels.
 
 \noindent
 Through the usage of wheel encoders attached to both these wheels, an estimated velocity for them is calculated and used to determine its pose.
@@ -295,10 +367,8 @@ The accumulative characteristic of these errors will break the stability of the 
 These conditions render this \gls{DR} model not adequate to determine the pose of the mobile robot, but its estimate could be used anyway to improve the positioning system.
 
 
-
-
 \begin{align}
-\mathbf{v}_{Enc_t} & = \mathbf{v}\\
+\mathbf{v}_{Enc_t} & = \mathbf{v} &
 \boldsymbol \omega_{Enc_t} & = \boldsymbol \omega
 \end{align}
 
@@ -346,6 +416,85 @@ J_H
 
 \subsection{GNSS receiver Model}
 
+
+\noindent Measure the satellite positions to estimate its absolute position global values in the global coordinate frame.
+
+Different \glspl{GNSS} are available.
+A \gls{GPS} receiver is embedded in the \gls{HRP}, shown in \ref{fig:autogps}.
+Moreover, two additional \gls{GPS} receivers has been added, shown in \ref{fig:phigps}.
+
+\begin{figure}[!ht]
+	\begin{center}
+		\begin{subfigure}[b]{.5\textwidth}
+			\centering
+			\includegraphics[width=0.75\textwidth]{Images/4-Methods/AutomowerGPS.jpeg}
+			\caption{Automower 450X GPS}
+			\label{fig:autogps}
+		\end{subfigure}%
+		\begin{subfigure}[b]{.45\textwidth}
+			\begin{center}
+				\label{tab:evalAutoGPS}
+				\begin{tabular}{|c||S|}
+					\hline
+					\centering{\textbf{Aspect}} &  \multicolumn{1}{c|}{\textbf{Value}} \\
+					\hline
+					\hline
+					\centering{Frequency} &  \SI{1}{Hz} \\
+					\hline
+					\centering{$\boldsymbol \eta_x$} &  \SI{0.02}{\meter/\second} \\
+					\hline
+					\centering{$\boldsymbol  \eta_y$} &  \SI{0.02}{\meter/\second} \\
+					\hline
+					\centering{$\boldsymbol \eta_{\theta}$} & \SI{0.02}{\radian/\second} \\
+					\hline
+				\end{tabular}
+				\caption{Sensor's performance}
+			\end{center}
+		\end{subfigure}
+		\caption{\glspl{GNSS} receivers adopted}
+		\label{fig:gpssensorauto}
+	\end{center}
+\end{figure}
+
+The performances of PhidgetGPS ID: 1040\_0B have been examined and are available below.
+
+\begin{figure}[!ht]
+	\begin{center}
+		\begin{subfigure}[b]{.5\textwidth}
+			\centering
+			\includegraphics[width=1\textwidth]{Images/4-Methods/1040_0B_Alt2.jpg}
+			\caption{Performances}
+			\label{fig:phigps}
+		\end{subfigure}
+		\begin{subfigure}[b]{.45\textwidth}
+			\begin{center}
+				\label{tab:evalPhiGPS}
+				\begin{tabular}{|c||S|}
+					\hline
+					\centering{\textbf{Aspect}} &  \multicolumn{1}{c|}{\textbf{Value}} \\
+					\hline
+					\hline
+					\centering{Frequency} &  \SI{5}{Hz} \\
+					\hline
+					\centering{$\boldsymbol \eta_x$} &  \SI{0.02}{\meter/\second} \\
+					\hline
+					\centering{$\boldsymbol  \eta_y$} &  \SI{0.02}{\meter/\second} \\
+					\hline
+					\centering{$\boldsymbol \eta_{\theta}$} & \SI{0.02}{\radian/\second} \\
+					\hline
+				\end{tabular}
+				\caption{Sensor's performance}
+			\end{center}
+		\end{subfigure}%
+		\caption{\glspl{GNSS} receivers}
+		\label{fig:gpssensorphi}
+	\end{center}
+\end{figure}
+
+
+
+It is mounted in front, at coordinate x,y,z with orientation theta with respect to the robot coordinate frame.
+
 \noindent The measures obtained by the \gls{GNSS} receiver are transformed from WSG-84 degrees to local coordinates as specified below.
 
 Using specific math equations derived by~\cite{Vincenty}, first a transformation from the geodetic coordinates in WSG-84 degrees estimated by the GPS receiver sensors to the ECEF coordinates is implemented.
@@ -369,7 +518,7 @@ From which the following can be derived the following values necessary for the n
 Using these values it is possible to transform from Geodetic WSG-84 Coordinates to ECEF coordinates using the  Algorithm specified in \ref{alg:ecef}.
 
 
-\begin{algorithm}[H]
+\begin{algorithm}[ht!]
 \caption{Geodetic to ECEF Coordinates }
 \label{alg:ecef}
   \hspace*{\algorithmicindent} \textbf{Input:} Latitude and Longitude ($lat$, $lon$) in WSG-84 degrees\\
@@ -387,9 +536,8 @@ Using these values it is possible to transform from Geodetic WSG-84 Coordinates 
     \end{algorithmic}
 \end{algorithm}
 
-Finally, by exploiting the previous algorithm, it is possible to transform the Current Geodetic Coordinates into Local Coordinates by using some Reference Geodetic Coordinates and the following Algorithm \ref{alg:local}.
-
-\begin{algorithm}[H]
+Finally, by exploiting the previous algorithm, it is possible to transform the Current Geodetic Coordinates into Local Coordinates by using some Reference Geodetic Coordinates and Algorithm \ref{alg:local}.
+\begin{algorithm}[ht!]
 \caption{Geodetic to Local using Current and Reference Coordinates}
 \label{alg:local}
     \hspace*{\algorithmicindent} \textbf{Input:} Current Latitude and Longitude ($latC$, $lonC$)\\
@@ -416,20 +564,17 @@ Finally, by exploiting the previous algorithm, it is possible to transform the C
 In order to get the mean using the first measurements before the first command to move the automower, those values are stored in $\mu_{lat}$ and $\mu_{long}$.
 
 The formula used to obtain the distance between this mean value and the current value of the gps measurements is defined below.
-
 \begin{align}
 \mathbf{x}_{GPS_t} & = \text{geodetic2enu}( latC - latR)\\
 \mathbf{y}_{GPS_t} & = \text{geodetic2enu}( longC - lonR)
 \end{align}
 
-Then the $\theta$
-
-
+Then the orientation $z_{\boldsymbol \theta_{GPS_t}}$ is obtained by computing the direction between consecutive measurements.
 \begin{equation}
 z_{\boldsymbol \theta_{GPS_t}} = \arctan(\mathbf{y}_{GPS_{t-1}} - \mathbf{y}_{GPS_t}, \mathbf{x}_{GPS_{t-1}} - \mathbf{x}_{GPS_t} )
 \end{equation}
 
-In this section we shall assume that wrapping operation
+"""In this section we shall assume that wrapping operation
 amounts to enforcing the angular variable to be in the [$-\pi$, $\pi$]
 interval, and we designate this operation as follows
 \begin{equation}
@@ -441,11 +586,11 @@ variables, the wrapping effect of the circle should be taken into
 account, e.g., the difference between 178° and -178° should
 evaluate to 4°. This is achieved by the function $w_{\pi}(x)$ when the difference
 is given as the argument, i.e., difference between two angles
-x and y is computed as $w_{\pi}(x-y)$, as defined in\cite{markovic_wrapping_2017}.
-
-$$
-\boldsymbol \theta_{GPS_t} = \boldsymbol \theta_{t} + w_{\pi}(z_{\boldsymbol \theta_{GPS_t}} - \boldsymbol \theta_{t})
-$$
+x and y is computed as $w_{\pi}(x-y)$, as defined in~\cite{markovic_wrapping_2017}.
+"""
+\begin{equation}
+	\boldsymbol \theta_{GPS_t} = \boldsymbol \theta_{t} + w_{\pi}(z_{\boldsymbol \theta_{GPS_t}} - \boldsymbol \theta_{t})
+\end{equation}
 
 Measurements vector with uncertainty vector
 \begin{align}
@@ -494,18 +639,70 @@ J_H
 
 \subsection{IMU Model}
 
-\noindent
-Measurements vector, as obtained by IMU, with uncertainty vector
+
+\noindent Measure the angular velocity, acceleration, and magnetic fields in the three orthogonal axis.
+
+This PhidgetSpatial Precision 3/3/3 High Resolution - ID: 1044\_1B, shown in \ref{fig:spatial}, has a 3-axis accelerometer, gyroscope and compass with high resolution readings at low magnitudes.
+
+The performances have been examined and are available below.
+
+\begin{figure}[!ht]
+	\begin{center}
+		\begin{subfigure}[b]{.5\textwidth}
+			\begin{center}
+				\includegraphics[width=1\textwidth]{Images/4-Methods/1044_1B.jpg}
+			\end{center}
+			\caption{Performances}
+			\label{fig:spatial}
+		\end{subfigure}
+		\begin{subfigure}[b]{.45\textwidth}
+			\begin{center}
+				\label{tab:evalPhiIMU}
+				\begin{tabular}{|c||S|}
+					\hline
+					\centering{\textbf{Aspect}} &  \multicolumn{1}{c|}{\textbf{Value}} \\
+					\hline
+					\hline
+					\centering{Frequency} &  \SI{250}{Hz} \\
+					\hline
+					\centering{$\boldsymbol \eta_{\omega}$} & \SI{0.02}{\radian/\second} \\
+					\hline
+					\centering{$\boldsymbol \eta_{a}$} & \SI{0.02}{\meter/\second \squared} \\
+					\hline
+				\end{tabular}
+				\caption{Sensor's performance}
+			\end{center}
+		\end{subfigure}%
+		\caption{\glspl{IMU}}
+		\label{fig:imusensorphi}
+	\end{center}
+\end{figure}
+
+It is mounted in front, at coordinate x,y,z with orientation theta with respect to the robot coordinate frame.
+
+"""As a general rule the closer is the IMU to the Centre of Gravity/Rotation the better; is to bear in mind that compensation for position offset reduces overall accuracy."""
+
+The mobile robot is constrained to move and rotate around its center of rotation, in a way that the displacement of the imu will not lower the performance, moreover, the angular velocity is the same for the whole robot, so the measured angular velocity can be fused directly.
+
+
+Measurements vector, as obtained by IMU, with uncertainty vector.
+
+The measurements obtained by the IMU are related to its own frame, so these measures need to be translated into the correct robot frame, by using the Rotation matrix.
+\begin{align}
+	\omega_r &= R_i^r \cdot \omega_i & \mathbf{a}_r &= R_i^r \cdot \mathbf{a}_i
+\end{align}
+
+Using the newly obtained calibrated measurements, the measurement matrix and related noise matrix are defined as follows.
 \begin{align}
 \mathbf{Z}
-=
+&=
 \begin{bmatrix}
 \boldsymbol \omega_{IMU_t} \\
 \mathbf{a}_{IMU_t} \\
 \end{bmatrix}^T
-& \quad
+& 
 \mathbf{R}
-=
+&=
 \begin{bmatrix}
 \eta_{\boldsymbol \omega_{IMU}} \\
 \eta_{\mathbf{a}_{IMU}} \\
@@ -536,11 +733,57 @@ J_H
 \end{equation}
 
 \subsection{Camera Model}
-\noindent 
-Odometry velocities merged, as the drift may still be an issue.
 
+
+\noindent Measure the displacement of the camera \gls{F2F} and provide \gls{VO}.
+The device that is used is the Intel® RealSense™ depth camera D435, shown in Figure \ref{fig:d435}.
+It provides \gls{RGBD} images, i.e. both \gls{RGB} and depth information.
+
+"The Intel® RealSense™ depth camera D435 is a stereo solution, offering quality depth for a variety of applications. It's wide field of view is perfect for applications such as robotics or augmented and virtual reality, where seeing as much of the scene as possible is vitally important."
+
+\begin{figure}[!ht]
+	\begin{center}
+		\begin{subfigure}[b]{.5\textwidth}
+			\begin{center}
+				\includegraphics[width=0.85\textwidth]{Images/4-Methods/d435i-1.png}
+			\end{center}
+			\caption{\gls{RGBD} Camera Performances}
+			\label{fig:d435}
+		\end{subfigure}
+		\begin{subfigure}[b]{.45\textwidth}
+			\begin{center}
+				\label{tab:evalCamera}
+				\begin{tabular}{|c||S|}
+					\hline
+					\centering{\textbf{Aspect}} &  \multicolumn{1}{c|}{\textbf{Value}} \\
+					\hline
+					\hline
+					\centering{Frequency} &  \SI{5}{Hz} \\
+					\hline
+					\centering{$\boldsymbol \eta_{v}$} & \SI{0.02}{\meter/\second} \\
+					\hline
+					\centering{$\boldsymbol \eta_{\omega}$} & \SI{0.02}{\radian/\second} \\
+					\hline
+				\end{tabular}
+				\caption{Sensor's performance}
+			\end{center}
+		\end{subfigure}%
+		\caption{Camera}
+		\label{fig:camera_sensor}
+	\end{center}
+\end{figure}
+
+It is mounted in front, at coordinate x,y,z with orientation theta with respect to the robot coordinate frame.
+
+Using the \gls{RTABMAP} package\footnote{\url{http://introlab.github.io/rtabmap/}}\cite{6094602} \cite{labbe_rtab-map_2019}, more specifically the \gls{ROS} version 0.20.9 for \gls{ROS} Noetic.
+
+
+\noindent 
 Measurements vector, as obtained by the \gls{RTABMAP} package in \gls{ROS}.
 Moreover, it also provides its own uncertainty vector error based on the uncertainty of the estimation over the images.
+
+Odometry velocities merged, as the drift may still be an issue.
+
 
 Measurements vector with uncertainty vector
 \begin{align}
@@ -583,16 +826,164 @@ J_H
 \end{equation}
 
 
+%\section{Localisation Configuration}
+\section{Sensor Fusion Model}
+\label{sec:locConf}
+\noindent
+The localisation module is based on the merging of the information derived by the kinematic model, the control commands, and the sensors' measurements.
+The sensor fusion algorithm \gls{AEKF} has been chosen for its time performances and reliability.
+It improves the \gls{KF} allowing for the management of non-linear systems and the possibility to account for dynamic sensors' noise.
+It is defined as a Discrete time system, running with a frequency defined by the value $Hz$.
+Its implementation is hereby defined, starting from the Prediction phase, the different Measurements models of the heterogeneous sensors, and the Correction phase.
+
+
+The system will start with all the state variables set to $0$ and a know initial Covariance matrix $P_0$ set as an Identity $I$ multiplied by $1^{-3}$, i.e. diagonal matrix with those values.
+
+\subsection{Prediction Model}
+
+\noindent The prediction phase is driven by the kinematic model, as it is defined in Figure \ref{fig:TikzKine}, following the conclusions of~\cite{801027}.
+
+As assumption, the system will follow a Constant Velocity Model.
+
+The state variables needed to provide the most accurate positioning in a \gls{2D} environment are defined in \eqref{eq:state-transf}.
+\begin{equation}
+	\label{eq:state-transf}
+	\mathbf{X}_t=
+	\begin{bmatrix}
+		\mathbf{x}_t & \mathbf{y}_t & \boldsymbol \theta_t & \mathbf{v}_t & \boldsymbol \omega_t
+	\end{bmatrix} ^T
+\end{equation}
+From the definition of the Kinematic Model in Figure \ref{fig:TikzKine}, the first three positional elements, i.e. $\mathbf{x}_t$, $\mathbf{y}_t$, and $\boldsymbol \theta_t$, are related to the global frame. Instead the following inertial elements, i.e. $\mathbf{v}_t$, $\boldsymbol \omega_t$, and $\mathbf{a}_t$ are defined from the robot frame.
+As assumption, the system will start with a known initial state $\mathbf{X}_0$ of mean $0$ for each element.
+
+%\subsubsection{Transition}
+The transition matrix related to the states defined in Equation \eqref{eq:state-transf} and to the kinematic model of Figure \ref{fig:TikzKine} is given by \eqref{eq:trans-mat}.
+\begin{equation}
+	\label{eq:trans-mat}
+	A_t
+	=
+	\begin{bmatrix}
+		1 & 0 & 0 & \cos(\boldsymbol \theta_t) \cdot \Delta_t & 0 \\
+		0 & 1 & 0 & \sin(\boldsymbol \theta_t) \cdot \Delta_t & 0 \\
+		0 & 0 & 1 & 0 & \Delta_t  \\
+		0 & 0 & 0 & 1 & 0 \\
+		0 & 0 & 0 & 0 & 1 & 
+	\end{bmatrix}
+\end{equation}
+where $\boldsymbol \Delta_t$ is the time step used by the \gls{AEKF}.
+It accounts for the transformation of the linear velocity, angular velocity, and the linear acceleration to update the position states that are used as \gls{DOF}, as defined in Equation \eqref{eq:dof}.
+
+%\subsubsection{Control}
+As defined in Section \ref{ssec:kin_a}, the \gls{ALM} is controlled using the linear and angular velocities.
+This configuration is used by the \gls{AEKF} to improve the Prediction step using the following Control matrix $B$ and states $\mathbf{u}_t$, as defined in Equations \eqref{eq:cmd}.
+\begin{align}
+	\label{eq:cmd}
+	B &=
+	\begin{bmatrix}
+		0 & 0 \\
+		0 & 0\\
+		0 & 0\\
+		\Delta_t & 0\\
+		0 & \Delta_t
+	\end{bmatrix}
+	&
+	\mathbf{u}_t &=
+	\begin{bmatrix}
+		\textbf{cmd}_{\mathbf{v}} - \mathbf{v}_t  \\
+		\textbf{cmd}_{\boldsymbol \omega} - \boldsymbol \omega_t \\[0.3em]
+	\end{bmatrix}
+\end{align}
+where $\Delta_t$ is the time step of the \gls{AEKF} used to make the transition from command received and actual actuation more smooth by dynamically scaling the innovation, and $\textbf{cmd}_{\mathbf{v}}$ and  $\textbf{cmd}_{\boldsymbol \omega}$ are the commands sent to the robot. % obtained by a specific topic. 
+\com{
+	and $\mathbf{s}_{i}$ is used to make the transition from command received and actual actuation more smooth by limiting the innovation given by the respective control through a scaling value equal to the frequency of the system: $\mathbf{s}_i = \frac{1}{Hz}$, with $Hz$ as the frequency of the \gls{AEKF}.
+}
+
+%\subsubsection{Uncertainty}
+\com{
+	The noise vector related to the state variables estimate is adaptively defined by $\boldsymbol \eta$ as in \eqref{eq:noise-p}.
+	\begin{equation}
+		\label{eq:noise-p}
+		\boldsymbol \eta
+		=
+		\begin{bmatrix}
+			\boldsymbol \eta_{\mathbf{x}}  &
+			\boldsymbol \eta_{\mathbf{y}} &
+			\boldsymbol \eta_{\boldsymbol \theta}  &
+			\boldsymbol \eta_{\mathbf{v}} &
+			\boldsymbol \eta_{\boldsymbol \omega} &
+			\boldsymbol \eta_{\mathbf{a}}
+		\end{bmatrix} ^T
+	\end{equation}
+	where $\eta_i \sim \mathcal{N}(\mu_i,\,\sigma_{ii}^{2})$ with $\mu_i = 0$, $\sigma_{ii}^2 = 0.1$, and $ i = \{ \mathbf{x} , \mathbf{y} , \boldsymbol \theta , \mathbf{v} , \boldsymbol \omega , \mathbf{a} \}$
+	where $\sigma_{\mathbf{xx}}^2 = \sigma_{\mathbf{yy}}^2 = \sigma_{\mathbf{\boldsymbol \theta \boldsymbol \theta}}^2  = \cfrac{{\boldsymbol \Delta_t}^2}{2}$, and $\boldsymbol \Delta_t$ is the time step used by the \gls{AEKF}.
+}
+
+The prediction of the estimate regarding the state variables is defined in the \gls{KF} by equation \eqref{eq:pred-state-formula}.
+	\begin{equation}
+		\label{eq:pred-state-formula}
+		\mathbf{X}_{p} = A \cdot \mathbf{X}_t + B \cdot \mathbf{u}_t + \boldsymbol \eta
+	\end{equation}
+
+%\subsubsection{Linearisation}
+
+As the Kalman Filter is not able to deal with non-linear systems, the Jacobian of the Transition matrix must be obtained to linearise the non-linear equations with a first-order Taylor expansion.
+The resulting matrix $J_A$, defined in \eqref{eq:j-a}, can then be used by the \gls{AEKF} for the prediction of the Covariance matrix.
+\begin{equation}
+	\label{eq:j-a}
+	J_A
+	=
+	\begin{bmatrix}
+		1 & 0 & 0 & -\sin(\boldsymbol \theta_t) \cdot \Delta_t & 0  \\
+		0 & 1 & 0 & ~\cos(\boldsymbol \theta_t) \cdot \Delta_t & 0  \\
+		0 & 0 & 1 & 0 & \Delta_t \\
+		0 & 0 & 0 & 1 & 0  \\
+		0 & 0 & 0 & 0 & 1  
+	\end{bmatrix}
+\end{equation}
+
+The prediction noise matrix, given by $Q$ in Equation \eqref{eq:q-p}, is defined by uncorrelated and zero-mean white noise, with the diagonal elements set dynamically as the related noise of the state variables.
+\begin{align}%Continuous White Noise Model
+	\label{eq:q-p}
+	\tiny
+	Q
+	=
+	\com{
+		{\sigma_{\mathbf{xx}}^2} & 0 & 0 & 0 & 0 \\
+		0 & \sigma_{\mathbf{yy}}^2 & 0 & 0 & 0 \\
+		0 & 0 & \sigma_{\mathbf{\boldsymbol \theta \boldsymbol \theta}}^2 & 0 & 0 \\
+		0 & 0 & 0 & \sigma_{\mathbf{vv}}^2 & 0 \\
+		0 & 0 & 0 & 0 & \sigma_{{\boldsymbol \omega}{\boldsymbol \omega}}^2
+	}
+	\begin{bmatrix}
+		{\sin(\boldsymbol \theta_t)}^2 \cdot \cfrac{{\Delta_t}^2}{2} & - \sin(\boldsymbol \theta_t) \cdot \cos(\boldsymbol \theta_t) \cdot \cfrac{{\Delta_t}^2}{2} & 0 & - \sin(\boldsymbol \theta_t) \cdot {\Delta_t}^2 & 0 \\
+		- \sin(\boldsymbol \theta_t) \cdot \cos(\boldsymbol \theta_t) \cdot {\Delta_t}^2 & \cos(\boldsymbol \theta_t)^2 \cdot \cfrac{{\Delta_t}^2}{2} & 0 & \cos(\boldsymbol \theta_t) \cdot {\Delta_t}^2 & 0 \\
+		0 & 0 & \cfrac{{\Delta_t}^2}{2} & 0 & { \Delta_t}^2 \\
+		- \sin(\boldsymbol \theta_t) \cdot {\Delta_t}^2 & \cos(\boldsymbol \theta_t) \cdot {\Delta_t}^2 & 0 & { \Delta_t} & 0 \\
+		0 & 0 & { \Delta_t}^2 & 0 & { \Delta_t}
+	\end{bmatrix}
+	\cdot
+	\sigma_a
+\end{align}
+where $\boldsymbol \Delta_t$ is the time step used by the \gls{AEKF} and $\sigma_a$ is the mean of the acceleration along the $X$ axis of the robot frame, as measured by the \glspl{IMU} or given by the costant $g = 9.81$ if no \glspl{IMU} are available, as done in ~\cite{king_low_2008}.
+This formulation is provided to model the error in the process as a function of the acceleration.
+The diagonal assumption means that the errors between variables are not directly associated, but their relationships and related propagation of errors will appear through the transition matrix Jacobian  $J_A$~\cite{king_low_2008}.
+
+Finally, the predicted covariance matrix, defined by $\hat{P}_{t+1}$ is updated during the prediction using the Jacobian $J_A$ and the process noise covariance $Q$, as in Equation \eqref{eq:cov-p}.
+\begin{align}
+	\label{eq:cov-p}
+	%P_0 &= I \cdot 1^{-3} &
+	\hat{P}_{t+1} & = J_A \cdot P_t \cdot J_A^T + Q
+\end{align}%P_{p} & =  \frac{P_{p} +  P_{p}^T}{2} && \text{To ensure symmetry}
+
 
 \subsection{Correction Model}
 
 \noindent
-Gather all measurements and then use those combined measures for one single correction step.
-
+Gather all measurements and then use those combined measures for one single correction step, following a batch fusion approach.
 
 Use of thread locks to avoid issues related to out of sequence measurements.
 
-Joseph Form Covariance update
+Joseph Form Covariance update is adopted, given the superior numerical performances obtained.
 (More time consuming) - Low improvements still relevant to be applied.
 
 \com{
@@ -642,7 +1033,7 @@ As defined in \cite{joubert2012adaptive} and \cite{singh_sonar_2019}, then the e
     P_{i,j}^{t+1} = \cfrac{P_{i,j}^{t} \cdot P_{env}}{P_{i,j}^{t} \cdot P_{env} + (1-P_{i,j}^{t}) \cdot (1-P_{env})}
 \end{equation}
 , where $P_{i,j}^{t}$ is the final value of cell $i,j$, $P_{i,j}^{t-1}$ is the previous value of the same cell, and $P_{env}$ is the collision event value.
-
+{\tiny }
 This update equation has the important advantage that it is associative and commutative, enabling to incorporate measurements in any order.
 
 \section{Evaluation Framework}

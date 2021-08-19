@@ -41,13 +41,13 @@
 Autonomous systems development has improved consistently in the later period, providing improvements to every day life.
 These systems are able to autonomously execute their tasks without human interaction and to adapt to dynamic settings.
 On the field of robotics, their support is relevant when tasks are repetitive and the human presence is not necessary.
-In the specific case of mobile robotics, autonomous navigation is required and those systems can achieve it using knowledge of their pose and surroundings.
+In the specific case of mobile robotics, autonomous navigation is required and those systems can achieve it using knowledge of their pose and surroundings~\cite{4140744}.
 
-The pose of a mobile robot can be estimated using sensors which provide measurements of their environment.
+The pose of a mobile robot can be estimated using sensors which provide measurements of their environment~\cite{autonomous-yasuda}.
 Multiple types of sensors are available, which differ in frequency, phenomenon captured, and reliability.
 Heterogeneous sensors provide measurements which need to be properly fused together to improve the individual knowledge that they provide.
 
-The awareness and the precision related to the position in the working environment changes with respect to each application.
+The awareness and the precision related to the position in the working environment changes with respect to each application~\cite{autonomous-yasuda}.
 The first autonomous mobile robots available to the consumers were the indoor cleaning robots, where simple collision detection is enough to wander in the indoor environment.
 A more recent consumer application of such robots is the \gls{ALM}, which works in the more complicated outdoor setting.
 
@@ -102,7 +102,7 @@ Moreover, the recent progresses in the performance of embedded devices and senso
 The combined availability of more advanced devices and more computational power enables for the implementation of real time applications to improve the performance of these mobile robots.
 
 
-The performance of an \gls{ALM} can be improved with a more advanced perception and action system used to implement deterministic techniques of coverage planning.
+The performance of an \gls{ALM} can be improved with a more advanced perception and action system used to implement deterministic techniques of coverage planning~\cite{autonomous-yasuda}.
 The problem that needs to be solved is the development of a more precise localisation and mapping module.
 The \gls{ALM}, to perceive its surroundings and act accordingly, needs additional computational power and sensors than the ones available in the current configurations.
 With a more advanced set of components, it would be possible to reach a more accurate understanding of the mobile robot's pose inside a map of the lawn itself.
@@ -165,13 +165,13 @@ The focus of this degree project is the precise localisation inside a predefined
 Moreover, a map of the lawn is developed to allow for updates using collision events against unexpected object to provide a more dynamic view of the lawn.
 %It will benefit both the industry of \gls{ALM} with the knowledge derived from this thesis, and the consumers will obtain a product which requires less maintenance.
 
-The research questions to be evaluated are the following:
+The research goals to be reached by this project are the following:
 \begin{itemize}
-    \item Providing an initial map and location of the \gls{ALM} in it, will the \gls{ALM} be able to stay within the given boundaries with a specified margin for error?
+    \item Providing an initial map and an initial location of the \gls{ALM} in it, will the \gls{ALM} be able to stay within the given boundaries with a specified margin for error?
     \item Will the \gls{ALM} be able to correctly update the map by adding or removing eventual obstacles found by navigating in the map through collision detection?
 \end{itemize}
 
-In order to evaluate if the above goals have been reached, for an \gls{ALM} made to cover an area of \SI{5000}{\meter\squared}, the following measurable objectives will be adopted:
+In order to evaluate if the above goals have been reached, for an \gls{ALM} made to cover an area of \SI{5000}{\meter\squared}, the following research questions will be evaluated:
 \begin{itemize}
     \item Identify if the mobile robot is able to stay within the boundaries defined, ensuring that the error in boundary violation will be inside the dimension of the \gls{ALM} itself: around \SI{50}{\cm}.
     These measures are defined to show that the lawn mower will not exceed its given boundaries, risking to damage itself, the lawn, or others.
@@ -289,8 +289,8 @@ It provides a summary about the lesson learned during the literature review.
 Chapter~\ref{ch:methods}, Methods, defines the localisation and mapping approaches chosen from the literature study.
 Moreover, the methodologies and experiments configurations to achieve the research goals are explained.
 
-Chapter~\ref{ch:whatYouDid}, Implementation, presents the system implementation adopted to test the system.
-It also motivates and elaborates on the implementation of the hardware and software required to run the system.
+%Chapter~\ref{ch:whatYouDid}, Implementation, presents the system implementation adopted to test the system.
+%It also motivates and elaborates on the implementation of the hardware and software required to run the system.
 
 Chapter~\ref{ch:results}, Experiments and Results, defines the experiments developed to address the research questions.
 Moreover, the quantitative results obtained from them are shown to highlight the desired aspects.

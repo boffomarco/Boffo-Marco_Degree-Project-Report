@@ -42,7 +42,7 @@ An analysis of the coordinate and robot frame is presented, followed by the defi
 \subsection{Coordinate Frame}
 
 \noindent
-The pose of the robot $P_r$ on the global frame frame $G$ is defined by the following degrees of freedom vector used to localise it in the \gls{2D} environment:
+The pose of the robot $P_r$ on the global frame frame $G$ is defined by the following \gls{DOF} vector used to localise it in the \gls{2D} environment:
 \begin{equation}
     P_r = \begin{bmatrix}x_r&y_r&\theta_r\end{bmatrix}^T
     \label{eq:dof}
@@ -103,8 +103,8 @@ sin(\theta_r) & cos(\theta_r) & y_r \\
 
 For the scope of this thesis, just the kinematics have been considered as other aspects, such as torque, friction, physical implications, and in general the dynamics of the systems, are not relevant to be analysed for the scope of this thesis.
 
-\subsection{Kinematic Model}
-
+\subsection{Kinematic Analysis}
+\label{ssec:kin_a}
 \noindent
 The \gls{ALM} consists of two drive back wheels mounted along the same axis.
 Each wheel is actuated independently either in forward or backward rotation.
@@ -167,7 +167,7 @@ Afterwards, different techniques available to fuse their heterogeneous measureme
 \noindent For a robot to localise itself, it needs to perceive its surroundings and to do so it relies on its sensors' measurements.
 These sensors perceive and interpret different recorded phenomena based on their characteristics, and they can be divided in three main different types.
 \textit{Interoceptive sensors} focus on internal data measured directly by the mobile robot. They output engineering quantities which are used to estimate how the system is behaving internally, e.g. wheel encoders.
-\textit{Proprioceptive sensors} measure robotic interaction with environment. They provide a value of how the movements of the mobile robot are perceived with respect to the outside, e.g. accelerometers, or gyroscopes.
+\textit{Proprioceptive sensors} measure robotic's interaction with the environment. They provide a value of how the movements of the mobile robot are perceived with respect to the outside, e.g. accelerometers, or gyroscopes.
 \textit{Exteroceptive sensors} provide measures related directly to their perception of the external environment. The information they measure are related to phenomena happening at the environments around the mobile robot, e.g. magnetometers, \glspl{GNSS}, or cameras.
 
 As they measure different aspects, they perform differently.
@@ -313,34 +313,35 @@ It does not require to store in memory the history of all the previous states an
 
 It uses a recursive probabilistic approach to efficiently filter discrete estimates of the states of a process and its estimated uncertainty, and then through new measurements it corrects its state and decreases its uncertainty with the goal of minimising the \gls{LMSE}.
 To reach an optimal estimation, at each iteration it performs a weighted sum of its current estimate using the prior estimate and new measurements, and weighting them based on their relative uncertainty.
-The \gls{KF} holds information about its estimate and uncertainty through, respectively, the state vector $\mathbf{x}_t$, which contains the states and descriptions of the system, and the state covariance matrix $P_t$,  which holds information about the variance between those states as statistical error indicator.
+The \gls{KF} holds information about its estimate and uncertainty through, respectively, the state vector $\mathbf{X}_t$, which contains the states and descriptions of the system, and the state covariance matrix $P_t$,  which holds information about the variance between those states as statistical error indicator.
 It is structured as continuous cycle of its iterative process, composed of a prediction and correction phase.
 
 The prediction phase estimates the next state based on the previous one, eventual control inputs, and adding Gaussian white noise to account for uncertainties in the prediction estimate.
 \com{
 We proceed under the Markovian assumption that p(xk)=∫∞−∞p(xk|xk−1)p(xk−1)dxk−1, meaning that the distribution over the state of an object at time k can be predicted entirely from its state at previous time k−1. (\url{https://stonesoup.readthedocs.io/en/latest/auto_tutorials/01_KalmanFilterTutorial.html#prediction})
 }
-First of all, the \gls{KF} computes the prediction of the current estimate $\hat{\mathbf{x}}_{t+1}$ using its previous estimate $\mathbf{x}_t $, the transition matrix $A$, eventual control inputs $B \cdot \mathbf{u}_t$, and the state noise vector $\boldsymbol \omega_t$:
+First of all, the \gls{KF} computes the prediction of the current estimate $\hat{\mathbf{X}}_{t+1}$ using its previous estimate $\mathbf{X}_t $, the transition matrix $A$, and eventual inputs $B \cdot \mathbf{u}_t$, as in equation \eqref{eq:pred-state}.%, and the state noise vector $\boldsymbol \eta_t$:
 \begin{align}
-\hat{\mathbf{x}}_{t+1} & = A \cdot \mathbf{x}_t + B \cdot \mathbf{u}_t + \boldsymbol \omega_t
+\hat{\mathbf{X}}_{t+1} & = A \cdot \mathbf{X}_t + B \cdot \mathbf{u}_t % + \boldsymbol \eta_t
   \label{eq:pred-state}
 \end{align}
-where the state, being a Gaussian random variable, can be described with its mean and covariance as $\mathbf{x}_{t} \sim \mathcal{N}\left(\mathbf{x}_{t},P_{t}\right)$, and its Gaussian noise as $\boldsymbol \omega_t \sim \mathcal{N}\left(0, Q\right)$.
-Then, the prediction of the current state covariance $\hat{P}_{t+1}$ is computed using the previous state covariance $P_t$, the transition matrix $A$, and the state noise covariance $Q$:
+where the state, being a Gaussian random variable, can be described with its mean and covariance as $\mathbf{X}_{t} \sim \mathcal{N}\left(\mathbf{X}_{t},P_{t}\right)$.%, and its Gaussian noise as $\boldsymbol \eta_t \sim \mathcal{N}\left(0, Q\right)$.
+Then, the prediction of the current state covariance $\hat{P}_{t+1}$ is computed using the previous state covariance $P_t$, the transition matrix $A$, and the state noise covariance $Q$, as in equation \eqref{eq:pred-cov-p}.
     \begin{align}
+    	\label{eq:pred-cov-p}
         \hat{P}_{t+1} & = A \cdot P_t \cdot A^T + Q
     \end{align}
 
 
-After a noisy measurement $\mathbf{z}_{t+1}$ has been obtained, the correction phase corrects the prediction based on the uncertainty of both the prediction and the measurement to improve the estimation of the state.
-As first step in the correction, the prediction of the estimated measurements, $\hat{\mathbf{z}}_{t+1}$, is obtained using the measurements matrix $H$:
+After a noisy measurement $\mathbf{Z}_{t+1}$ has been obtained, the correction phase corrects the prediction based on the uncertainty of both the prediction and the measurement to improve the estimation of the state.
+As first step in the correction, the prediction of the estimated measurements, $\hat{\mathbf{z}}_{t+1}$, is obtained using the measurements matrix $H$, as in equation \eqref{eq:pred-measure}.
     \begin{align}
-    \hat{\mathbf{z}}_{t+1} & = H \cdot \hat{\mathbf{x}}_{t+1}
+    \hat{\mathbf{Z}}_{t+1} & = H \cdot \hat{\mathbf{X}}_{t+1}
     \label{eq:pred-measure}
     \end{align}
-Then, the innovation vector, $\mathbf{y}_{t+1}$, is computed as the difference between the estimated measurements and the actual measurements $\mathbf{z}_{t+1}$:
+Then, the innovation vector, $\mathbf{Y}_{t+1}$, is computed as the difference between the estimated measurements and the actual measurements $\mathbf{Z}_{t+1}$:
     \begin{align}
-    \mathbf{y}_{t+1} & = \mathbf{z}_{t+1} - \hat{\mathbf{z}}_{t+1}
+    \mathbf{Y}_{t+1} & = \mathbf{Z}_{t+1} - \hat{\mathbf{Z}}_{t+1}
     \end{align}
 Its related innovation covariance, $S$, is given by the following formula, where $R$ is the measurements process noise:
     \begin{align}
@@ -350,12 +351,13 @@ The Kalman gain, $K$, is then computed to improve the estimate as a relation bet
     \begin{align}
     K & = \hat{P}_{t+1} \cdot H^T \cdot S^{-1}
     \end{align}
-The corrected state, $\mathbf{x}_{t+1}$, is then obtained using the predicted state and the innovation vector weighted by the innovation covariance:
+The corrected state, $\mathbf{X}_{t+1}$, is then obtained using the predicted state and the innovation vector weighted by the innovation covariance:
     \begin{align}
-    \mathbf{x}_{t+1} & = \hat{\mathbf{x}}_{t+1} + K \cdot \mathbf{y}_{t+1}
+    \mathbf{X}_{t+1} & = \hat{\mathbf{X}}_{t+1} + K \cdot \mathbf{Y}_{t+1}
     \end{align}
-Finally, the corrected covariance matrix of the state, $P_{t+1}$, is obtained by the following formula:
+Finally, the corrected covariance matrix of the state, $P_{t+1}$, is obtained by equation \eqref{eq:standard-corr-cov}.
     \begin{align}
+    	\label{eq:standard-corr-cov}
     P_{t+1} & = (I - K \cdot H) \cdot \hat{P}_{t+1}
     \end{align}
 
@@ -373,18 +375,18 @@ After this, the loop of equations restarts from the prediction phase by updating
     % Place the blocks
     \node[text width=1cm, rounded corners=3pt, block,
           label={[above,align=center]{Initial State}}] at (-2, 0) (initial)
-          {\begin{align*}\mathbf{x}_0 \\ P_0\end{align*}};
+          {\begin{align*}\mathbf{X}_0 \\ P_0\end{align*}};
     \node at (0.0, 0.0) (sum) {};
     \node[block, text width=6cm,
           label={[above,align=center]{Prediction}}] at (4, 0) (prediction)
           {\begin{align*}
-        \hat{\mathbf{x}}_{t+1} & = A \cdot \mathbf{x}_t + B \cdot \mathbf{u}_t + \boldsymbol \omega_t\\
+        \hat{\mathbf{X}}_{t+1} & = A \cdot \mathbf{X}_t + B \cdot \mathbf{u}_t \\ % + \boldsymbol \eta_t\\
         \hat{P}_{t+1} & = A \cdot P_t \cdot A^T + Q
            \end{align*}};
     \node [block, right of=prediction,
             node distance=3cm, text width=2.4cm,
             label=above right:{New}, label=below right:{Measure}] at (5, -1.33) (iterUpdate)
-            {$\mathbf{z}_{t+1}$};
+            {$\mathbf{Z}_{t+1}$};
     \node [block, left of=prediction,
             node distance=3cm, text width=2.4cm,
             label=left:{Next step}] at (2.8, -1.33) (iterChange)
@@ -392,11 +394,11 @@ After this, the loop of equations restarts from the prediction phase by updating
     \node [block, text width=6cm,
            label={[above,align=center]{Correction}}] at (4, -4) (innovation)
            {\begin{align*}
-    \hat{\mathbf{z}}_{t+1} & = H \cdot \hat{\mathbf{x}}_{t+1}\\
-    \mathbf{y}_{t+1} & = \mathbf{z}_{t+1} - \hat{\mathbf{z}}_{t+1}\\
+    \hat{\mathbf{Z}}_{t+1} & = H \cdot \hat{\mathbf{X}}_{t+1}\\
+    \mathbf{Y}_{t+1} & = \mathbf{Z}_{t+1} - \hat{\mathbf{Z}}_{t+1}\\
     S & = H \cdot \hat{P}_{t+1} \cdot H^T + R\\
     K & = \hat{P}_{t+1} \cdot H^T \cdot S^{-1} \\
-    \mathbf{x}_{t+1} & = \hat{\mathbf{x}}_{t+1} + K \cdot \mathbf{y}_{t+1}\\
+    \mathbf{X}_{t+1} & = \hat{\mathbf{X}}_{t+1} + K \cdot \mathbf{Y}_{t+1}\\
     P_{t+1} & = (I - K \cdot H) \cdot \hat{P}_{t+1}
             \end{align*}};
 
@@ -418,17 +420,17 @@ The initial state $\mathbf{x}_{0}$ can be defined either by zeros or starting es
 The starting uncertainty of the filter $P_0$ can be initialized with the identity matrix or directly with the state noise covariance. In both cases, the filter will need some steps before converging to more stable estimates of state and covariance.
 The state noise covariance $Q$ is harder to determine, as the transition equations would need to specify maximum bounds to define its components.
 The measurement noise covariance $R$ is composed by the variances of its components and they are usually estimated through calibration.
-If the state and measurement noises change over time, their matrices $Q$ and $R$ needs to be updated as the filter runs, as it is their relative ratio which determines how the Kalman gain $K$ is defined to improve the estimates. In this case, the \gls{KF} is defined as adaptive~\cite{adaptive}~\cite{1099422}.
+If the state and measurement noises change over time, their matrices $Q$ and $R$ needs to be updated as the filter runs, as it is their relative ratio which determines how the Kalman gain $K$ is defined to improve the estimates. In this case, the \gls{KF} is defined as Adaptive~\cite{adaptive}~\cite{1099422}.
 
 
 An numerical evaluation improvement over the standard \gls{KF} is directly given by changing the state covariance correction step using the Joseph’s form~\cite{schmidt_analysis_2010}, defined by:
 \begin{equation}
     P_{t+1} = (I - K \cdot H) \cdot \hat{P}_{t+1} \cdot (I - K \cdot H)^T + K \cdot R \cdot K^T
 \end{equation}
-As the standard state covariance correction is composed by subtraction, which can result in a loss in symmetry and positive-definiteness due to rounding errors in a finite word length computer, the Joseph’s form state covariance correction maintains positive and non-zero eigenvalues in $P_t$ through a more computationally demanding equation~\cite{BarShalom2001EstimationWA}.
+As the standard state covariance correction in Equation \eqref{eq:standard-corr-cov} is composed by subtraction, which can result in a loss in symmetry and positive-definiteness due to rounding errors in a finite word length computer, the Joseph’s form state covariance correction maintains positive and non-zero eigenvalues in $P_t$ through a more computationally demanding equation~\cite{BarShalom2001EstimationWA}.
 
 For the filter to be considered an optimal estimator, it needs to exploit the properties of the Gaussian uncertainties, meaning that the disturbances in both the process and measurements need to be composed by Gaussian white noise.
-Moreover, the prediction and correction phases are formulated with the assumptions that the state $\mathbf{x}_t$ is markovian, i.e. that is evolution depends solely on its previous value, and that the measurement $\mathbf{z}_{t+1}$ only depends on the state $\mathbf{x}_{t+1}$, and not on previous measurements.
+Moreover, the prediction and correction phases are formulated with the assumptions that the state $\mathbf{X}_t$ is markovian, i.e. that is evolution depends solely on its previous value, and that the measurement $\mathbf{Z}_{t+1}$ only depends on the state $\mathbf{X}_{t+1}$, and not on previous measurements.
 When these assumptions are validated, the \gls{KF} is proven to be the best linear estimator possible.
 However, it can be used with reasonable results even if the assumptions are not true, i.e. when the noise is not Gaussian and the system is non linear, but in those cases other filters will perform better and must be preferred, such as the ones described below.
 In any case, as the \gls{KF} needs multiple iterations to stabilise, if its state is observable, the performance of the algorithm should not account for the first steps.
@@ -437,9 +439,9 @@ In any case, as the \gls{KF} needs multiple iterations to stabilise, if its stat
 
 \noindent The \gls{EKF} is an extension of the \gls{KF} used to estimate non linear systems, where equations \eqref{eq:pred-state} and \eqref{eq:pred-measure} are defined respectively as follows:
 \begin{align}
-\hat{\mathbf{x}}_{t+1} & = f(\mathbf{x}_{t}) + \varepsilon &&
+\hat{\mathbf{X}}_{t+1} & = f(\mathbf{X}_{t}) + \varepsilon &&
     \textrm{where}~\varepsilon \sim \mathcal{N}(0, Q)\\
-\hat{\mathbf{z}}_{t+1} & = h(\hat{\mathbf{x}}_{t+1}) + \delta &&
+\hat{\mathbf{Z}}_{t+1} & = h(\hat{\mathbf{X}}_{t+1}) + \delta &&
     \textrm{where}~\delta \sim \mathcal{N}(0, R)
 \end{align}
 
@@ -450,8 +452,8 @@ The obtained first order derivatives, defined as Jacobian matrices, are used as 
 \newcommand{\partialat}[2]{\frac{\partial {#1}}{\partial {#2}}}
 The corresponding matrices will be substituted in the previously defined equations for the \gls{KF}, as:
 \begin{align}
-F = \partialat{f}{x} & &
-H = \partialat{h}{x}
+F = \partialat{f}{\mathbf{X}_{t}} & &
+H = \partialat{h}{\hat{\mathbf{X}}_{t+1}}
 \end{align}
 
 The linear approximation of the \gls{EKF} is based on the first order derivatives, providing only first order accuracy. In case of highly non linear systems, this procedure can inject relevant errors in the system and cause divergence of the estimate.
@@ -477,7 +479,6 @@ Using this methodology to define the internal map of the mobile robot could be u
 By initialising the map with a random uncertainty, the mobile robot will be able to move freely inside its boundaries and as soon as it approximates to an negative cell it will change its direction to avoid getting out of its limits.
 At the same time, it will be able to use its sensors to perceive its surroundings and update the occupancy cells based on the identifies obstacles within it.
 Then, once a better certainty about its knowledge of the map in reached, the mobile robot could employ path planning algorithms to improve its coverage performance.
-
 
 
 
@@ -508,7 +509,7 @@ Their \texttt{robot\_localization}\footnote{\url{http://wiki.ros.org/robot_local
 However, its performance and static configuration do not allow for the implementation of a real time system which needs updates with an high frequency.
 
 Other approaches to sensor fusion using the \gls{KF} to merge the measures of the available sensors are described in the literature.
-In~\cite{801027}, an analysis about the difference of performance between \glspl{KF} driven by the  kinematic model or by the \gls{WO} measures is described. As a conclusion, while their performance are similar, the kinematic driven \gls{KF} was preferred.
+In~\cite{801027}, an analysis about the difference of performance between \glspl{KF} driven by the kinematic model or by the \gls{WO} measures is described. As a conclusion, while their performance are similar, the kinematic driven prediction phase \gls{KF} was preferred.
 
 
 Some references which use an \gls{EKF} to merge measures from a similar set of sensors available with a different mobile robot, than the one discussed in this thesis, are described below.
@@ -555,8 +556,8 @@ It is nice to have this chapter conclude with a summary. For example,you can inc
 \begin{itemize}
     \item a localisation module could be built in a modular way starting from a general model and its kinematic analysis.% and the usage of that \gls{ROS}-enabled mobile platform to easily test and compare the results of different configurations of sensors;
     \item the sensors available, which do not require an external infrastructure installations, are enough to measure the necessary phenomena to cover the states needed to improve the localisation aspects of a mobile robot;
-    \item statistical sensor fusion techniques enables for the merging of measure from different and heterogeneous sensors with performances which are robust and fast enough to be implemented in an embedded device;
-    \item the \gls{AEKF} provides good estimates and it can be tuned using changing the noises related to the measures, as the localisation scope requires;
+    \item statistical sensor fusion techniques enables for the merging of measure from different and heterogeneous sensors with performances which are robust and fast enough to be implemented in an embedded device. 
+    The \gls{AEKF} provides good estimates and it can be tuned updating the noises which characterise the system according to sensor's measures, as the localisation scope requires;
     \item occupancy grids provide a \gls{2D} abstractions of the environment which can account both the definitions of its boundaries and the presence of obstacles within it;
     \item the usage of collision events to update the knowledge of the cells in the occupancy grid is possible using the Bayes Theorem.
     \item numerous related studies and implementations have been developed in similar topics to improve localisation and mapping features.%, and the analysis of an optimal configuration of sensors which require no external installations is still relevant to the best of the found knowledge.
