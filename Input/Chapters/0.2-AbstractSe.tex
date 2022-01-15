@@ -17,23 +17,45 @@ Exchange students many want to include one or more abstracts in the language(s) 
 }
 }
 
-DRAFT
+\noindent 
+Autonoma gräsklippare har varit tillgängliga för konsumenter i mer än $20 $ år.
+Under denna period har framsteg inom beräkningar av inbyggda enheter och sensorprestanda lett till förbättringar av tillförlitligheten hos dessa robotar.
+Trots de senaste förbättringarna är möjligheten till innovation av sådana system fortfarande betydande.
+% hej kompis det här är inte meningsfullt för mig, men lägg tillbaka det om du vill Trots detta har lite ansträngning ägnats åt deras innovation och utveckling relaterad till utvecklingen av nya funktioner.
 
-\noindent
-Autonoma gräsklippare har varit tillgängliga för konsumenter i mer än $ 20 $ år nu.
-Under denna tid har dock deras konfiguration och prestanda sett små förbättringar.
+% Varför är detta ett problem?
+Autonoma robotar har fortfarande begränsade funktioner.
+De förlitar sig på elektriska ledningar installerade under jord för att avgränsa gräsmattans gränser, som de reagerar på utan resonemang.
+En sådan konfiguration anses nu vara föråldrad och mer effektiva autonoma lösningar finns tillgängliga.
 
-Med framstegen inom inbäddade enheter och sensorer är en sådan konfiguration nu föråldrad.
-Funktionerna som tillhandahålls nu är begränsade och fortfarande utsatta för fel.
-Dessutom kräver den installerade externa infrastrukturen som de förlitar sig på, dvs. begränsningskabeln, underhåll.
+% ange din lösning.
+Den här avhandlingen fokuserar på att använda för närvarande tillgängliga tekniker för att designa de kärnmoduler som behövs för att förbättra kapaciteten hos dessa system. % (denna mening säger inte så mycket, det är ganska allmänt ... vad gör du egentligen? dvs utformar ett kalmanfilter för att göra xyz)
+Analysen och relaterad implementering av både lokaliserings- och kartläggningsfunktioner för autonoma gräsklippare presenteras.
+Heterogena sensorer och deras olika konfigurationer undersöks och ett Adaptive Extended Kalman Filter föreslås för att smälta samman deras mätningar.
+Denna teknik förbättrar poseuppskattningen av den autonoma gräsklipparen, som sedan utnyttjas av kartläggningsmodulen.
+Det valda tillvägagångssättet för den senare, baserat på Bayesians slutledning, lyckas uppdatera kunskapen om kartan baserat på direkta interaktioner med omgivningen.
 
-Denna avhandling analyserar implementeringen av en lokaliserings- och kartläggningsmodul som möjliggör implementering av fler funktioner.
-Flera sensorer för att förbättra lokaliseringen av den autonoma gräsklipparen analyseras och den bästa konfigurationen presenteras.
-Dessutom implementeras kartläggningsfunktioner över positioneringssystemet för att uppdatera förståelsen för robotens miljö.
+% skissa konsekvenserna av din lösning
+De slutliga resultaten belyser vikten av exakt lokalisering som den verkliga flaskhalsen för utvecklingen av nya funktioner.
+Den förbättrade positions-uppskattningen gör det möjligt att definiera en virtuell gräns. Definitionen inte tillräckligt korrekt för att korrekt kartlägga förekomsten av objekt i miljön
+Exempel på avancerade funktioner från den föreslagna konfigurationen är implementeringen av deterministiska täckningsalgoritmer och interaktionen med gräsmattaobjekt.
 
-Denna lösning kan användas för att förbättra täckningsfunktionen för den autonoma gräsklipparen.
-Dessutom kan tillgängligheten av en mer exakt lokalisering vara utgångspunkten för mer avancerade funktioner, t.ex. interaktion med gräsmattan.
 
+
+\com{Autonoma gräsklippare har varit tillgängliga för konsumenterna i mer än $20$ år nu.
+Under denna tidsperiod har dock deras konfiguration och prestanda sett små förbättringar.
+
+Med framsteg inom inbyggda enhetsberäkningar och sensorprestationer kan implementeringen anses vara föråldrad.
+De tillgängliga funktionerna är begränsade och fortfarande utsatta för fel.
+Dessutom kräver den installerade externa infrastrukturen som de förlitar sig på, dvs begränsningskabeln, underhåll.
+
+Denna avhandling analyserar implementeringen av en lokaliserings- och kartläggningsmodul.
+Flera sensorer och deras olika konfigurationer analyseras för att förbättra poseuppskattningen av den autonoma gräsklipparen.
+De bästa inställningarna antas sedan med kartmodulen för att uppdatera en karta med förståelse för robotens miljö.
+
+Denna lösning är utgångspunkten för mer avancerade funktioner avancerade aspekter.
+Tillgängligheten av en mer exakt lokalisering och kartdefinition möjliggör implementering av täckningsdefinitionsalgoritmer och interaktion med gräsmattan.
+}
 \subsection*{Nyckelord}
 \noindent
 Autonom mobil robot, sensorfusion, lokalisering, kartläggning

@@ -8,6 +8,102 @@
 }
 
 
+\com{
+\begin{figure}[H]
+	\begin{center}
+		\begin{tikzpicture}[font=\small,thick]
+			\node[draw, text centered, fill=white!30,
+			align=center,
+			minimum width=3cm,
+			minimum height=1cm,
+			] (block0) { Localisation };
+
+			\node[draw, text centered, fill=white!30,rounded corners,
+			above=2cm of block0,align=center,
+			minimum width=2.5cm,
+			minimum height=1cm,
+			] (block01) { Kinematic\\Model };
+
+			\node[draw,text centered,fill=white!30,rounded corners,
+			left=of block0, align=center,
+			minimum width=2cm,
+			minimum height=1cm,
+			] (block1) { \gls{GNSS} };
+
+			\node[draw,text centered,fill=white!30,rounded corners,
+			above=0.5cm of block1, align=center,
+			minimum width=2cm,
+			minimum height=1cm,
+			] (block2) { \gls{WO} };
+
+			\node[draw,text centered,fill=white!30,rounded corners,
+			left=0.5cm of block01,
+			align=center,
+			minimum width=2cm,
+			minimum height=1cm,
+			] (block3) { Control };
+
+			\node[draw,text centered,fill=white!30,rounded corners,
+			below=0.5cm of block1,
+			align=center,
+			minimum width=2cm,
+			minimum height=1cm,
+			] (block4) { \glspl{IMU} };
+
+			\node[draw,text centered,fill=white!30,rounded corners,
+			below=0.5cm of block4,
+			align=center,
+			minimum width=2cm,
+			minimum height=1cm,
+			] (block5) { \gls{VO} };
+
+			\node[draw,text centered,fill=white!30,rounded corners,
+			right=of block0,
+			align=center,
+			minimum width=2cm,
+			minimum height=1cm,
+			] (block6) { \textbf{Pose Estimation} };
+
+
+			\node[draw,text centered,fill=white!30,
+			right=of block6,
+			align=center,
+			minimum width=2cm,
+			minimum height=1cm,
+			] (block8) { Mapping };
+
+			\node[draw,text centered,fill=white!30,rounded corners,
+			above=of block8,
+			align=center,
+			minimum width=2cm,
+			minimum height=1cm,
+			] (block7) { Collision Events};
+
+			\node[draw,text centered,fill=white!30,rounded corners,
+			below=of block8,
+			align=center,
+			minimum width=2cm,
+			minimum height=1cm,
+			] (block9) { \textbf{Occupancy Grid} };
+
+			% Arrows
+			\draw[-latex] (block1) edge (block0);% node [above, fill=white] {Label Text};
+			\draw[-latex] (block01) edge (block0);
+			\draw[-latex] (block2) edge (block0);
+			\draw[-latex] (block3) edge (block0);
+			\draw[-latex] (block4) edge (block0);
+			\draw[-latex] (block5) edge (block0);
+			\draw[-latex] (block0) edge (block6);
+			\draw[-latex] (block6) edge (block8);
+			\draw[-latex] (block7) edge (block8);
+			\draw[-latex] (block8) edge (block9);
+
+		\end{tikzpicture}
+		\caption[Caption]{Proposed architecture of the solution. \centering}
+		\label{fig:structure}
+	\end{center}
+\end{figure}
+}
 
 \subsection{Robotic Operating System Framework}
 \label{ssec:ros}
@@ -553,5 +649,155 @@ P_t & = \frac{P_t + P_t^T}{2}
     \end{lstlisting}
 }
 
+
+\section{Evaluation Framework}
+\com{
+\todo[inline]{This should also show that you are aware of the social and ethical concerns that might be relevant to your data collection method.)}
+}
+
+
+\label{sec:testing}
+
+\noindent 
+The evaluation configuration is defined, showing how the system developed is performing and how its performance are going to be evaluated.
+
+Multiple tests are made.
+The teleoperation script available is used to control the mobile robot in velocity.
+The measures obtained by an experiments are stored in \gls{ROS} bags which can be used later on to test the filter multiple times with the same experiment.
+
+Different configurations that are going to be tested provide different observabilty performance for the AEKF filter.
+observability
+
+
+
+Finally, to evaluate if the objectives have been fulfilled and the results can be evaluated as valuable, the following steps are required:
+\begin{itemize}
+	\item The quantitative measures need to be tested in a real use case experiment, as specified in the research questions.
+	\item The data, acquired during these testing phases, will be used and analysed to check if the set of objectives have been reached.
+	\item A statistical analysis over multiple experimental tests will provide more reliable results to be presented in the final report.
+\end{itemize}
+
+
+To gather data used to test and analyse the performance of the system, multiple outdoor tests have been carried on.
+Some tests have been made to define the calibration of the sensors against a ground truth identified using measure tape.
+Some other tests have been made to ensure that the system is behaving accurately while steering.
+Some tests have been made to check that the collision events are estimated with an certain degree of precision.
+
+During these tests the rosbag utils provided by ROS has been exploited. Through this service it is possible to store every message sent to the topics, and they can be reused in the future to tune the algorithms.
+In this way, the real measurements gathered during outdoor testing can be re evaluated through the play of said messages and using a simulated parameter to reset the clock of ROS framework.
+
+
+
+\subsection{Ground Truth Generation} \todo{ground truth, simulation, data analysis, these are not evaluation metrics. You can make a different subheading for these ("Experimental Design? idk")}
+\label{sec:gt}
+
+\noindent The ground truth is constructed manually by checking the actual path travelled by the robot with the usage of a meter. Setting the experiment and having the robot to follow that path manually, commanding it using the given teleoperation script.
+
+
+\subsection{Simulation design}
+\label{sec:simDesign}
+
+\noindent Simulations will provide an overview of the sensor fusion should behave.
+
+It will use the measures obtained by the Ground Truth.
+As a real measure is obtained by a sensors, a simulated measure is generated from the ground truth using a Gaussian white noise to satisfy the Kalman assumptions.
+
+These simulated measures are used by the Kalman filter to offer its estimate.
+
+
+
+\subsection{Data Analysis Technique} \todo{can remove? This paragraph I mean}
+
+\noindent To compare the performances of different configurations, different experiments have been run.
+The different performance offered by different configuration is provided comparing the measures of the desired aspects with the frequency of the \gls{EKF}, i.e. at each step of the Sensor Fusion process the estimates of the pose are compared with the Ground Truth.
+
+
+
+\subsection{Localisation Metrics}
+
+\noindent Different metrics are adopted to measure the performances of the algorithms designed.
+
+For the localisation, an important value to consider is the final offset between the ground truth and the estimated position.
+In this way, the consistency of the localisation can be measured, considering that after a long run the \gls{ALM} must be able to return close to its own charging station.
+
+The overall performance of the localisation is given by the difference between the ground truth and the estimate at each step.
+\gls{RMSE} is used to compute the performance at each step.
+It uses the whole history of errors and then provides its value.
+\begin{equation}
+    RMSE_j = \sqrt{ \frac{1}{N}\sum_{i=1}^{N} (GroundX_j^{(i)}~-~CheckX_j^{(i)})^2}
+\end{equation}
+where $j$ indicates the value of the state that is evaluated, $i$ indicates the step to be evaluated, $N$ is the number of comparisons based on the steps computed, $GroundX_j^{(i)}$ is the ground truth value at that step, $CheckX_j^{(i)}$ is the value to be compared for performance evaluation.
+
+Another aspect to consider is the time displacement of each filter step, as a more efficient algorithm must be able to operate at higher frequencies.
+
+
+\subsection{Mapping Metrics}
+\noindent Multiple procedures are defined to compare the estimated map with respect to the ground map.
+Each of them bring different perspectives, and they will be split into the Complete map, the boundary definition, and the collision identification.
+
+The \gls{RMSE} compares each cell. \todo{if you don't need all of these metrics, you could just choose one for simplicity.}
+
+The Baron metric is defined as 
+\begin{equation}
+    1
+\end{equation}
+It considers ...
+
+The Pearson metric is defined as 
+\begin{equation}
+    2
+\end{equation}
+It considers ...
+
+The F1 metric is defined from the Precision and Recall as:
+\begin{equation}
+    3
+\end{equation}
+It considers ... 
+
+\com{
+	\subsection{Validity Method}
+	\todo[inline]{How will you know if your results are valid?}
+	\noindent The method is valid if the simulation filtering provide values close to the ground truth, showing that if the assumptions are validated then the system behaves as best estimator.
+
+
+	\subsection{Validity of data}
+
+	\subsection{Reliability of method}
+	\todo[inline]{How will you know if your results are reliable?}
+	\noindent The results are valid if they shows that the filter has been trained with some parameters, and using the same parameters it is possible to run different experiments as well with reliable results.
+
+	The parameters found during training of the filter are then tested in another experiment to ensure that the performances are indifferent from the environment.
+
+
+	\subsection{Reliability of data}
+}
+
+
+
+\com{
+	\subsection{Validity Method}
+	\todo[inline]{How will you know if your results are valid?}
+	\noindent The method is valid if the simulation filtering provide values close to the ground truth, showing that if the assumptions are validated then the system behaves as best estimator.
+	\subsection{Validity of data}
+	\subsection{Reliability of method}
+	\todo[inline]{How will you know if your results are reliable?}
+	\noindent The results are valid if they shows that the filter has been trained with some parameters, and using the same parameters it is possible to run different experiments as well with reliable results.
+	The parameters found during training of the filter are then tested in another experiment to ensure that the performances are indifferent from the environment.
+	\subsection{Reliability of data}
+	
+    \subsection{Simulation design}
+    \label{sec:simDesign}
+    \noindent Simulations will provide an overview of the sensor fusion should behave.
+    It will use the measures obtained by the Ground Truth.
+    As a real measure is obtained by a sensors, a simulated measure is generated from the ground truth using a Gaussian white noise to satisfy the Kalman assumptions.
+    These simulated measures are used by the Kalman filter to offer its estimate.
+    The performances of different configurations are compared using the same different experiments have been run.
+    The different performance offered by different configuration is provided comparing the measures of the desired aspects with the frequency of the \gls{EKF}, i.e. at each step of the Sensor Fusion process the estimates of the pose are compared with the Ground Truth.
+
+}
+
+
 \cleardoublepage
 %\clearpage
+

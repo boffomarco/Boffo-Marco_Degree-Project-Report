@@ -188,40 +188,19 @@ We use its APIs to gather the measurements and then publish them as ROS topics, 
 
 
 
-\chapter{Competitor Analysis}
-
-\noindent As this master thesis has been developed under the programme of EIT Digital\footnote{\url{https://masterschool.eitdigital.eu/}}, an analysis of the competitor will be performed to highlight the current state of the art at an industrial level for \glspl{ALM} which require no boundary wire installation, understanding their current implementations, and evaluating possible improvements.
-
-Toadi\footnote{\url{https://www.toadi.com/}} is a startup company based in Belgium which offers as only product an \gls{ALM} of the same name. It employs a single visual sensor system to provide the localisation features. It can mow an area of \SI{4800}{\meter\squared}.
-Its installation is performed though a track and follow approach to determine the boundaries of the lawn, it has been in testing phase and it is available to the public from May 2021.
-
-The LUNA platform from Inertial Systems\footnote{\url{https://inertialsense.com/autonomy/}} employs all the sensors listed above to provide a localisation and navigation module, which has been used for \glspl{ALM}. This platform was developed to enable engineers to directly embed autonomous capability into existing equipment avoiding the development of a localisation module, as it is detailed in this thesis.
-
-Kingdom Technologies\footnote{\url{https://www.kingdom.garden/}} provide an \gls{ALM} at a monthly fee to commercial clients.
-It employs sensor fusion techniques to merge several different sensors' measures to improve the positioning of the robot on a lawn that could reach an area of \SI{7500}{\meter\squared}.
-
-Ambrogio L60 Elite S+\footnote{\url{https://www.ambrogiorobot.com/en/models/view/l60-elite-s}} requires no installation for areas up to \SI{400}{\meter\squared}.
-It employs a grass sensor to detect the presence of grass under itself and it uses a specific robotic joint to recognise any holes or empty spaces. With these sensors it is able to navigate around a defined lawn using a reactive approach, but without the need for the boundary wire.
-
-Different approaches which do not require the boundary wire installation but which still need some external infrastructures are the following.
-
-Husvarna 550 EPOS\footnote{\url{https://www.husqvarna.com/us/products/robotic-lawn-mowers/models/automower-550-epos/}} is a new \gls{ALM} available for commercial customers which employs a \gls{GPSRTK} sensor to cover areas of \SI{5000}{\meter\squared}. It needs an external and expensive receiver to correct the \gls{GNSS} estimates of the robot and improve its localisation performance to just a few centimeters error.
-
-iRobot Terra t7\footnote{\url{https://www.irobot.co.uk/Terra}} is the \gls{ALM}
-It relies on wireless navigation beacons installed on the garden to triangulate the position of the mower using their signals. However, the implementation of such technology has concerned the \gls{NRAO}, as the original intended frequency they used were disturbing the measurements of that organisation, and they had to change their beacons using \gls{UWB} signal technology.
-
-The currently developed \glspl{ALM} are still far from being mature and available to all customers.
-For this reason, an analysis of the best configuration of sensors to improve on the localisation aspects without the need for an external installation is provided, as improved localisation performance of autonomous mobile robots are required.
-
-Numerous related studies and implementations have been developed in similar topics to improve localisation features, and the analysis of an optimal configuration of sensors which require no external installations is still relevant to the best of the found knowledge.
-
-
-
 \chapter{Highly-Non-Linear Sensor Fusion}
-\noindent The system analysed in this thesis is not characterised by high non-linearity given the high frame-rate available, and as such the adopted \gls{AEKF} is robust, fast, and sufficient.
+\label{ch:non-linear}
+\noindent The system analysed in this thesis is not characterised by high non-linearity given the high frame-rate available, and as such the adopted \gls{EKF} is robust, fast, and sufficient.
 
-A brief description of other linearisations, such as the \gls{UKF}, and other approaches, such as \gls{PF}, are provided in this appendix.
+A brief description of other linearisations, such as the \gls{IEKF} and the \gls{UKF}, and other approaches, such as \gls{PF}, are provided in this Appendix.
 Even if they are not used in this thesis, they are noteworthy to mention to provide a more comprehensive overview of sensor fusion techniques, in case of highly non linear systems.
+
+
+\section{Iterated Extended Kalman Filter}
+\label{sec:iekf}
+\noindent An improvement on the performance of the \gls{EKF}, regarding how to handle highly non-linear systems, has been defined in the \gls{IEKF}. As described in~\cite{xu_adaptive_2014}, the correction step is iterated along new estimates after every measure to achieve a more accurate estimation and a lower variance before a new prediction step.
+However, its estimates are obtained at an additional computational expense.
+
 
 \section{Unscented Kalman Filter}
 \label{sec:ukf}
@@ -229,10 +208,10 @@ Even if they are not used in this thesis, they are noteworthy to mention to prov
 Instead of using a linearisation approach, the \gls{UKF} is based on a deterministic sampling method.
 The estimates are propagated through the non linear system using sample values, called sigma points, defined by the unscented transform.
 This procedure provides two values along the mean of the estimate and symmetrically placed on its main uncertainty axes.
-Although the results are not a Gaussian random variables, their mean and standard deviation can be derived from them to maintain the \gls{KF} assumption.
+Although the results are not Gaussian random variables, their mean and standard deviation can be derived from them to maintain the \gls{KF} assumption.
 
-Its improvements in estimates and covariance accuracy are relevant over the \gls{EKF} when the functions $f$ and $h$ are highly non-linear, as it is accurate to the second order Taylor's expansion.
-Moreover, it does not need to compute Jacobians of the non linear functions of the system~\cite{thrun_probabilistic_2005}.
+Its improvements in estimates and covariance accuracy are relevant over the \gls{EKF} when the functions $f$ and $h$ are highly non-linear, as it is accurate to the second-order Taylor's expansion.
+Moreover, it does not need to compute Jacobians of the non-linear functions of the system~\cite{thrun_probabilistic_2005}.
 
 
 
@@ -242,7 +221,7 @@ Moreover, it does not need to compute Jacobians of the non linear functions of t
 It is an iterative algorithm which saves multiple potential state estimate values, known as particles.
 The probability the state estimate value in a moment in time is given by the density of particles nearby which contains similar values.
 At each iteration, a sampling phase is performed generating temporary particles using the current estimated state.
-Afterwards an importance factor is calculated using new measurements of the state and it provides a likelihood value for the next estimations.
+Afterwards, an importance factor is calculated using new measurements of the state and it provides a likelihood value for the next estimations.
 In the resampling phase, the proper particles are updated by using the estimates provided by one of the temporary particles with a selection based on the importance factor.
 This process is continuously iterate and the particles will eventually converge to a proper estimate over several steps.
 
@@ -258,7 +237,8 @@ The Rao-Blackwellized \gls{PF} extends it using both particles and Gaussian rand
 
 
 For these nodes to cooperate, they are connected by a middle-layer structure based on a network of topics or services, following a blackboard architecture of data sharing.
-It provides a graph-like structure were each program, described as node, can both publish and subscribe messages among the created and available topics.
+It provides a graph-like structure were each program, described as a
+node, can both publish and subscribe messages among the created and available topics.
 
 Topics can be seen as variables which are used for streaming communication and share information between nodes.
 A \Gls{ROS} node publishes a specific message through a topic and every other node can subscribe to that topic and receive all the messages posted to it.
@@ -297,7 +277,85 @@ Commonly used frames are odom and base\_link. The odom frame has the origin at t
 	\label{fig:ros-frame}
 \end{figure}
 
+An important feature provided by \gls{ROS} is the "rosbag" utility. 
+It allows to store and replay the content of the specified topics with every related timestamp.
+This functionality is vital to execute the tests using the same data, as the content of the topic will be the same as the one obtained during testing and collecting information on the field.
+However, in order to store large amount of information (i.e., images), the performances of the whole system might be lower than without storing them. As such, a tradeoff between stored and discarded information is needed to ensure good performances and still gather enough data for repeatability of the experiments.
 
+
+\chapter{GNSS measure conversion}
+\label{ch:conv-gnss}
+\noindent
+
+\noindent
+In order to use the measurements 
+A transformation is needed to map the geodetic coordinates in WSG-84 degrees estimated by the GPS receiver sensors into the ECEF coordinates which will be used in input for the \gls{EKF}. 
+It is done so both for the initial coordinate and then used to check the difference with the ECEF translation from the geodetic coordinates of the successive reading of the GPS receiver.
+To do so, specific math equations derived by~\cite{Vincenty} are needed. 
+
+
+%GPS positioning is in the global coordinate system WGS84 [18].
+
+From World Geodetic System: WGS 84 values
+\begin{align}
+    R_E &= 6378137 && \text{Equatorial radius (\SI{}{\meter})} \\
+    R_P &= 6356752.3142 && \text{Polar radius (\SI{}{\meter})}
+\end{align}
+
+From which the following can be derived the following values necessary for the next algorithms:
+\begin{align}
+    F_R &= \frac{R_E - R_P}{R_E} &
+    E_R &= F_R \cdot (2-F_R)
+\end{align}
+
+Using these values it is possible to transform from Geodetic WSG-84 Coordinates to ECEF coordinates using the  Algorithm specified in \ref{alg:ecef}.
+
+
+\begin{algorithm}[ht!]
+\caption{Geodetic to ECEF Coordinates }
+\label{alg:ecef}
+  \hspace*{\algorithmicindent} \textbf{Input:} Latitude and Longitude ($lat$, $lon$) in WSG-84 degrees\\
+  \hspace*{4em} Altitude ($h$) in meters\\
+  \hspace*{\algorithmicindent} \textbf{Output:} ECEF Coordinates in meters ($x$, $y$, $z$)
+  %\KwData{Testing set $x$}
+  %$\sum_{i=1}^{\infty} := 0$ \tcp*{this is a comment}
+  %\tcc{Transform latitude and longitude}
+  \begin{algorithmic}[1]
+  \STATE $N = \cfrac{EqR}{\sqrt{1 - E_R \cdot \sin(lat)^2}}$
+  \STATE $x = (h + N) \cdot \sin(lat) \cdot \cos(lon)$
+  \STATE $y = (h + N) \cdot \cos(lat) \cdot \sin(lon)$
+  \STATE $z = (h + (1 - e\_sq) \cdot N) \cdot \sin(lat)$
+  \STATE return $x$, $y$, $z$
+    \end{algorithmic}
+\end{algorithm}
+
+Finally, by exploiting the previous algorithm, it is possible to transform the Current Geodetic Coordinates into Local Coordinates by using some Reference Geodetic Coordinates and Algorithm \ref{alg:local}. 
+\begin{algorithm}[ht!]
+\caption{Geodetic to Local using Current and Reference Coordinates}
+\label{alg:local}
+    \hspace*{\algorithmicindent} \textbf{Input:} Current Latitude and Longitude ($latC$, $lonC$)\\
+        \hspace*{5em} in WSG-84 degrees\\
+    \hspace*{4em} Current Altitude ($hC$) in meters\\
+    \hspace*{4em} Reference Latitude and Longitude ($latR$, $lonR$)\\
+        \hspace*{5em} in WSG-84 degrees\\
+    \hspace*{4em} Reference Altitude ($hR$) in meters \\
+    \hspace*{\algorithmicindent} \textbf{Output:} Local Coordinates in meters ($\Delta x$, $\Delta y$, $\Delta z$)
+  \begin{algorithmic}[1]
+    \STATE $xC$, $yC$, $zC$ = Geodetic to ECEF Coordinates ($latC$, $lonC$, $hC$)
+    \STATE $xR$, $yR$, $zR$ = Geodetic to ECEF Coordinates ($latR$, $lonR$, $hR$)
+    \STATE $xD = xC - xR$
+    \STATE $yD = yC - yR$
+    \STATE $zD = zC - zR$
+    \STATE $\Delta x = -~\sin(lonR)~\cdot~xD~+~\cos(latR)~\cdot~yD$
+    \STATE $\Delta y = -~\cos(lonR)~\cdot~\sin(latR)~\cdot~xD~-~\sin(latR)~\cdot~\sin(lonR)~\cdot~yD~+ \hspace*{3em} \cos(latR)~\cdot~zD$
+    \STATE $\Delta z = \cos(latR)~\cdot~\cos(lonR)~\cdot~xD~+~\cos(latR)~\cdot~\sin(lonR)~\cdot~yD~+  \hspace*{3em} \sin(latR)~\cdot~zD$
+    \STATE return $\Delta x$, $\Delta y$, $\Delta z$
+    \end{algorithmic}
+
+\end{algorithm}
+
+
+\com{
 
 \chapter{Repository}
 \noindent
@@ -400,8 +458,8 @@ As it does not provide the measurements directly, the \gls{VO} package \gls{RTAB
 
 
 \subsection{Launching the localisation feature}
-\noindent The localisation improvements are performed by the script in \texttt{AEKF.py}.
-It performs the \gls{AEKF} elaborated in \ref{sec:locConf}.
+\noindent The localisation improvements are performed by the script in \texttt{EKF.py}.
+It performs the \gls{EKF} elaborated in \ref{sec:locConf}.
 
 To perform in an asynchronous way, a binary lock is adopted to account when a measurement update is performed at the same time of a measurement receive.
 
@@ -414,6 +472,37 @@ The initial phase is of setting the boundaries.
 Then a specific message changes the
 
 The collision events are then exploited to update the knowledge of the surroundings.
+
+}
+
+
+\chapter{Competitor Analysis}
+\label{ch:competitors}
+
+\noindent As this master thesis has been developed under the programme of EIT Digital\footnote{\url{https://masterschool.eitdigital.eu/}}, an analysis of the competitor will be performed to highlight the current state of the art at an industrial level for \glspl{ALM} which require no boundary wire installation, understanding their current implementations, and evaluating possible improvements.
+
+Toadi\footnote{\url{https://www.toadi.com/}} is a startup company based in Belgium which offers as only product an \gls{ALM} of the same name. It employs a single visual sensor system to provide the localisation features. It can mow an area of \SI{4800}{\meter\squared}.
+Its installation is performed though a track and follow approach to determine the boundaries of the lawn, it has been in testing phase and it is available to the public from May 2021.
+
+The LUNA platform from Inertial Systems\footnote{\url{https://inertialsense.com/autonomy/}} employs all the sensors listed above to provide a localisation and navigation module, which has been used for \glspl{ALM}. This platform was developed to enable engineers to directly embed autonomous capability into existing equipment avoiding the development of a localisation module, as it is detailed in this thesis.
+
+Kingdom Technologies\footnote{\url{https://www.kingdom.garden/}} provide an \gls{ALM} at a monthly fee to commercial clients.
+It employs sensor fusion techniques to merge several different sensors' measures to improve the positioning of the robot on a lawn that could reach an area of \SI{7500}{\meter\squared}.
+
+Ambrogio L60 Elite S+\footnote{\url{https://www.ambrogiorobot.com/en/models/view/l60-elite-s}} requires no installation for areas up to \SI{400}{\meter\squared}.
+It employs a grass sensor to detect the presence of grass under itself and it uses a specific robotic joint to recognise any holes or empty spaces. With these sensors it is able to navigate around a defined lawn using a reactive approach, but without the need for the boundary wire.
+
+Different approaches which do not require the boundary wire installation but which still need some external infrastructures are the following.
+
+Husvarna 550 EPOS\footnote{\url{https://www.husqvarna.com/us/products/robotic-lawn-mowers/models/automower-550-epos/}} is a new \gls{ALM} available for commercial customers which employs a \gls{GPSRTK} sensor to cover areas of \SI{5000}{\meter\squared}. It needs an external and expensive receiver to correct the \gls{GNSS} estimates of the robot and improve its localisation performance to just a few centimeters error.
+
+iRobot Terra t7\footnote{\url{https://www.irobot.co.uk/Terra}} is the \gls{ALM}
+It relies on wireless navigation beacons installed on the garden to triangulate the position of the mower using their signals. However, the implementation of such technology has concerned the \gls{NRAO}, as the original intended frequency they used were disturbing the measurements of that organisation, and they had to change their beacons using \gls{UWB} signal technology.
+
+The currently developed \glspl{ALM} are still far from being mature and available to all customers.
+For this reason, an analysis of the best configuration of sensors to improve on the localisation aspects without the need for an external installation is provided, as improved localisation performance of autonomous mobile robots are required.
+
+Numerous related studies and implementations have been developed in similar topics to improve localisation features, and the analysis of an optimal configuration of sensors which require no external installations is still relevant to the best of the found knowledge.
 
 
 

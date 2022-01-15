@@ -5,23 +5,44 @@
     \markboth{\abstractname}{}
 
 
-DRAFT
-
 \noindent
-I tosaerba autonomi sono disponibili per i consumatori da più di $ 20 $ anni.
+I tosaerba autonomi sono disponibili per i consumatori da oltre $ 20 $ anni.
+Durante questo periodo, i progressi nei calcoli dei dispositivi integrati e nelle prestazioni dei sensori hanno portato a miglioramenti nell'affidabilità di questi robot.
+Nonostante i recenti miglioramenti, l'opportunità di innovazione di tali sistemi rimane significativa.
+% ciao amico questo non ha senso per me, ma rimettilo se vuoi Nonostante questo, poco sforzo è stato speso per la loro innovazione ed evoluzione relativa allo sviluppo di nuove funzionalità.
+
+% Perché questo è un problema?
+I robot autonomi hanno ancora funzionalità limitate.
+Si affidano a fili elettrici installati sottoterra per delimitare i confini del prato, a cui reagiscono senza ragionamento.
+Tale configurazione è ormai considerata obsoleta e sono disponibili soluzioni autonome più efficaci.
+
+% indica la tua soluzione.
+Questa tesi si concentra sull'utilizzo delle tecniche attualmente disponibili per progettare i moduli principali necessari per far avanzare le capacità di questi sistemi. % (questa frase non dice molto, è abbastanza generica... cosa stai facendo veramente? cioè progetta un filtro kalman per fare xyz)
+Vengono presentate l'analisi e la relativa implementazione delle funzionalità di localizzazione e mappatura per i tosaerba autonomi.
+Vengono studiati sensori eterogenei e le loro diverse configurazioni e viene proposto un filtro di Kalman adattivo esteso per fondere le loro misurazioni.
+Questa tecnica migliora la stima della posa del rasaerba autonomo, che viene poi sfruttata dal modulo di mappatura.
+L'approccio scelto per quest'ultimo, basato sull'inferenza bayesiana, riesce ad aggiornare la conoscenza della mappa basata su interazioni dirette con l'ambiente.
+
+% abbozza le conseguenze della tua soluzione
+I risultati finali evidenziano l'importanza di una localizzazione precisa come vero collo di bottiglia per lo sviluppo di nuove funzionalità.
+La stima della posa migliorata consente la definizione di un confine virtuale. La definizione non è sufficientemente precisa per mappare correttamente la presenza di oggetti nell'ambiente
+Esempi di funzionalità avanzate a partire dalla configurazione proposta sono l'implementazione di algoritmi di copertura deterministici e l'interazione con gli oggetti del prato.
+
+\com{
+I tosaerba autonomi sono disponibili per i consumatori da più di $20$ anni.
 Durante questo lasso di tempo, tuttavia, la loro configurazione e le prestazioni hanno visto piccoli miglioramenti.
 
-Con il progresso dei dispositivi e dei sensori integrati, una tale configurazione è ora obsoleta.
-Le funzionalità fornite ora sono limitate e ancora soggette a errori.
+Con il progresso nei calcoli dei dispositivi embedded e nelle prestazioni dei sensori, la loro implementazione può essere considerata ormai obsoleta.
+Le funzionalità disponibili sono limitate e ancora soggette a errori.
 Inoltre, l'infrastruttura esterna installata su cui si basano, ovvero il cavo perimetrale, richiede manutenzione.
 
-Questa tesi analizza l'implementazione di un modulo di localizzazione e mappatura che consente l'implementazione di più funzionalità.
-Vengono analizzati più sensori per migliorare la localizzazione del rasaerba autonomo e viene presentata la configurazione migliore.
-Inoltre, le funzionalità di mappatura vengono implementate sul sistema di posizionamento per aggiornare la comprensione dell'ambiente del robot.
+Questa tesi analizza l'implementazione di un modulo di localizzazione e mappatura.
+Vengono analizzati più sensori e le loro diverse configurazioni per migliorare la stima della posa del tosaerba autonomo.
+Le migliori impostazioni vengono quindi adottate con il modulo di mappatura per aggiornare una mappa con la comprensione dell'ambiente del robot.
 
-Questa soluzione potrebbe essere utilizzata per migliorare la funzionalità di copertura del rasaerba autonomo.
-Inoltre, la disponibilità di una localizzazione più precisa potrebbe essere il punto di partenza per funzionalità più avanzate, ad es. interazione con il prato.
-
+Questa soluzione è il punto di partenza per funzionalità più avanzate aspetti avanzati.
+La disponibilità di una localizzazione e definizione cartografica più precisa consente l'implementazione di algoritmi di definizione della copertura e di interazione con il prato.
+}
 \subsection*{Parole chiave}
 \noindent
 Robot mobili autonomi, fusione di sensori, localizzazione, mappatura

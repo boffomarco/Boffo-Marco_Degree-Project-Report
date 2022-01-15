@@ -1,7 +1,6 @@
 \documentclass[english]{kththesis}
 
 
-
 \input{Input/packages.tex}
 
 
@@ -17,12 +16,18 @@
 
 \selectlanguage{english}
 
+\includepdf[pages=1]{Input/kth-cover.pdf}
+\newpage
+\null
+\thispagestyle{empty}
 \input{Input/Chapters/0-Title}
 
 %\listoftodos
 
 % Frontmatter includes the abstracts and table-of-contents
 %\frontmatter
+
+\pagenumbering{Roman}
 \setcounter{page}{1}
 
 \input{Input/Chapters/0.1-AbstractEng}
@@ -41,23 +46,24 @@
 \input{Input/Chapters/0.5-Info}
 
 
+
 % Mainmatter is where the actual contents of the thesis goes
 \mainmatter
 
 \renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+
+\pagenumbering{arabic}
 
 \begin{sloppypar}
     \input{Input/Chapters/1-Introduction}
 
     \input{Input/Chapters/2-Background}
 
+    \input{Input/Chapters/3-0-SetUp}
+    
     \input{Input/Chapters/3-Method}
 
-    %\input{Input/Chapters/4-Implementation}
-
     \input{Input/Chapters/5-Result}
-
-    \input{Input/Chapters/6-Discussion}
 
     \input{Input/Chapters/7-Conclusion}
 
@@ -71,4 +77,5 @@
 
 \input{Input/DIVA}
 
+\includepdf[pages=2]{Input/kth-cover.pdf}
 \end{document}

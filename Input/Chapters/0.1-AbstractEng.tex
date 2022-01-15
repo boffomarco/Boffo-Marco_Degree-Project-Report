@@ -26,23 +26,30 @@ Write an abstract\todo{Use about 1/2 A4-page (250 and 350 words).}  with the fol
   \item Results/Conclusions/Consequences/Impact: What are your key results/conclusions? What will others do based upon your results? What can be done now that you have finished - that could not be done before your thesis project was completed?\todo[inline]{The presentation of the results should be the main part of the abstract.}
 \end{itemize}
 }
-DRAFT
 
 \noindent
-Autonomous lawn mowers have been available to consumers for more than $20$ years now.
-During this lapse of time, however, their configuration and performance have seen little improvements.
+% State the problem.
+Autonomous lawn mowers have been available to consumers for more than $20$ years.
+During this period, advancements in embedded device computations and sensor performance have led to improvements in the reliability of these robots. 
+Despite recent improvements, the opportunity for further innovation of such systems remains significant. 
+% hi buddy this doesn't make sense to me but put it back in if you want Despite this, little effort has been spent on their innovation and evolution related to the development of new features.
 
-With the advancement in embedded devices and sensors, such a configuration is now obsolete.
-The features provided now are limited and still prone to errors.
-Moreover, the installed external infrastructure on which they rely, i.e. the boundary wire, requires maintenance.
+% Why is this a problem?
+Currently, many autonomous robots rely on electric wires installed underground to delimit the boundaries of the lawn. %, to which they react without reasoning.
+Such a configuration is simple, but more effective autonomous solutions are available.
 
-This thesis analyses the implementation of a localisation and mapping module which allows for the implementation of more features.
-Multiple sensors to improve the localisation of the autonomous lawn mower are analysed, and the best configuration is presented.
-Additionally, mapping features are implemented over the positioning system to update the understanding of the robot's environment.
+% state your solution.
+This thesis focuses on %employing currently available techniques to design the core modules needed to advance the capabilities of these systems. % (this sentence is not saying much, it's pretty general... what are you actually doing? i.e. designs a kalman filter to do xyz)
+the analysis and related implementation of both localisation and mapping features for autonomous lawn mowers. % are presented.
+Heterogeneous sensors and their different configurations are investigated and an Adaptive Extended Kalman Filter is proposed to fuse their measurements.
+This technique improves the pose estimation of the autonomous lawn mower, which is then exploited by the mapping module.
+%The chosen approach for the latter, b
+Based on Bayesian's inference, the mapping module updates the knowledge of the map based on direct interactions with the environment.
 
-This solution could be used to improve the coverage feature of the autonomous lawn mower.
-Moreover, the availability of a more precise localisation could be the starting point for more advanced features, e.g. interaction with the lawn.
-
+% sketch the consequences of your solution
+The final results highlight the importance of precise localisation as the bottleneck for the development of new features.
+The improved pose estimation enables the employment of a virtual boundary, but it is not accurate enough to precisely map the presence of objects in the environment.
+Advanced features which could be developed from the proposed configuration are related to deterministic coverage algorithms and the interaction with lawn objects.
 
 
 \subsection*{Keywords}
